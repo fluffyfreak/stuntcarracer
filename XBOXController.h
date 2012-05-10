@@ -17,13 +17,35 @@ class CXBOXController
 {
 private:
 	XINPUT_STATE _controllerState;
+	XINPUT_STATE _previousState;
 	int _controllerNum;
+	bool _isConnected;
 public:
 	// ctor - playerNumber 1<>4
 	CXBOXController(const int playerNumber);
-	XINPUT_STATE GetState();
-	bool IsConnected();
+	void Update();
+	bool IsConnected() const;
 	void Vibrate(const unsigned short leftVal = 0, const unsigned short rightVal = 0);
+
+	bool buttonDown( const int btn ) const;
+	bool buttonPressed( const int btn ) const;
+	bool buttonReleased( const int btn ) const;
+	bool buttonHeld( const int btn ) const;
+
+	bool rightTriggerDown() const;
+	bool rightTriggerPressed() const;
+	bool rightTriggerReleased() const;
+	bool rightTriggerHeld() const;
+
+	bool leftTriggerDown() const;
+	bool leftTriggerPressed() const;
+	bool leftTriggerReleased() const;
+	bool leftTriggerHeld() const;
+
+	SHORT thumbLX() const { return _controllerState.Gamepad.sThumbLX; }
+	SHORT thumbLY() const { return _controllerState.Gamepad.sThumbLY; }
+	SHORT thumbRX() const { return _controllerState.Gamepad.sThumbRX; }
+	SHORT thumbRY() const { return _controllerState.Gamepad.sThumbRY; }
 };
 
 #endif

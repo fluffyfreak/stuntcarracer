@@ -18,7 +18,7 @@
 #include "Car Behaviour.h"
 #include "Opponent Behaviour.h"
 #include "Wavefunctions.h"
-
+#include "XBOXController.h"
 
 //-----------------------------------------------------------------------------
 // Defines, constants, and global variables
@@ -37,6 +37,7 @@ GameModeType GameMode = TRACK_MENU;
 // Both the following are used for keyboard input
 UINT keyPress = '\0';
 DWORD lastInput = 0;
+static CXBOXController P1Controller(1);
 
 static IDirectSound8 *ds;
 IDirectSoundBuffer8 *WreckSoundBuffer;
@@ -76,6 +77,13 @@ extern long INITIALISE_PLAYER;
 extern bool raceFinished, raceWon;
 extern long lapNumber[];
 
+void HandlePad( CXBOXController &pad );
+static void setGameMode(const GameModeType gmt) {
+	// set the game
+	GameMode = gmt;
+	// reset the last input so it doesn't carry over for previous game mode
+	lastInput = 0;
+};
 
 //-----------------------------------------------------------------------------
 // Static variables
@@ -838,10 +846,17 @@ static void StopEngineSound( void )
 
 void CALLBACK OnFrameMove( IDirect3DDevice9 *pd3dDevice, double fTime, float fElapsedTime, void *pUserContext )
 {
-static D3DXVECTOR3 vUpVec( 0.0f, 1.0f, 0.0f );
-static long frameCount = 0;
-DWORD input = lastInput;	// take copy of user input
-D3DXMATRIX matRot, matTemp, matTrans, matView;
+	static const D3DXVECTOR3 vUpVec( 0.0f, 1.0f, 0.0f );
+	static long frameCount = 0;
+	D3DXMATRIX matRot, matTemp, matTrans, matView;
+
+	// fetch the pad input here
+	P1Controller.Update();
+	// if pad is connected then handle input
+	if( P1Controller.IsConnected() ) {
+		HandlePad(P1Controller);
+	}
+	DWORD input = lastInput;	// take copy of user input
 
 	bFrameMoved = FALSE;
 //	VALUE3 = frameGap;
@@ -908,6 +923,7 @@ D3DXMATRIX matRot, matTemp, matTrans, matView;
 		{
 			if ((GameMode == GAME_IN_PROGRESS) && (!bPlayerPaused))
 				CarBehaviour(input,
+							 P1Controller,
 							 &player1_x,
 							 &player1_y,
 							 &player1_z,
@@ -1072,11 +1088,11 @@ static void HandleTrackMenu( CDXUTTextHelper &txtHelper )
 		keyPress = '\0';
 		}
 
-	if ((keyPress == 'S') && (TrackID != NO_TRACK))
+	if (((keyPress == 'S') || P1Controller.buttonReleased(XINPUT_GAMEPAD_A)) && (TrackID != NO_TRACK))
 		{
 		bNewGame = TRUE;	// Used here just to reset the opponent's car, which is then shown during the track preview
 		ResetPlayer();		// Also reset player to clear values if there was a previous game (CarBehaviour normally does this, but isn't called for track preview)
-        GameMode = TRACK_PREVIEW;
+        setGameMode(TRACK_PREVIEW);
 		bPlayerPaused = bOpponentPaused = FALSE;
 		keyPress = '\0';
 		}
@@ -1105,10 +1121,10 @@ static void HandleTrackPreview( CDXUTTextHelper &txtHelper )
 	txtHelper.DrawTextLine( L"  R = Point car in opposite direction, P = Pause, O = Unpause" );
 	txtHelper.DrawTextLine( L"  M = Back to track menu, Escape = Quit" );
 
-	if (keyPress == 'S')
+	if ((keyPress == 'S') || P1Controller.buttonReleased(XINPUT_GAMEPAD_A))
 		{
 		bNewGame = TRUE;
-        GameMode = GAME_IN_PROGRESS;
+        setGameMode(GAME_IN_PROGRESS);
 		// initialise game data
 		ResetLapData(OPPONENT);
 		ResetLapData(PLAYER);
@@ -1208,7 +1224,7 @@ void RenderText( double fTime )
 				diffTime = currentTime - gameEndTime;
 				if (diffTime > 6.0)
 				{
-					GameMode = GAME_OVER;
+					setGameMode(GAME_OVER);
 				}
 
 				if (GameMode == GAME_OVER)
@@ -1425,6 +1441,70 @@ LRESULT CALLBACK MsgProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam,
 // messages to the application.  The framework does not remove the underlying keystroke 
 // messages, which are still passed to the application's MsgProc callback.
 //--------------------------------------------------------------------------------------
+void HandlePad( CXBOXController& pad )
+{
+	if( pad.buttonPressed(XINPUT_GAMEPAD_DPAD_UP) )	{
+		bShowStats = !bShowStats;
+	}
+	//if( pad.buttonPressed(XINPUT_GAMEPAD_DPAD_DOWN) ) {}
+	if( pad.buttonPressed(XINPUT_GAMEPAD_DPAD_LEFT) ) {
+		++bTrackDrawMode;
+		if (bTrackDrawMode > 1) {
+			bTrackDrawMode = 0;
+		}
+		DXUTReset3DEnvironment();
+	}
+	if( pad.buttonPressed(XINPUT_GAMEPAD_DPAD_RIGHT) ) {
+		NextSceneryType();
+	}
+	if( pad.buttonPressed(XINPUT_GAMEPAD_START) ) {
+		bPaused = !bPaused;
+	}
+	if( pad.buttonPressed(XINPUT_GAMEPAD_BACK) ) {
+		if (GameMode != TRACK_MENU)
+		{
+			setGameMode(TRACK_MENU);
+			opponentsID = NO_OPPONENT;
+			// reset all animated objects
+			ResetDrawBridge();
+		}
+	}
+
+	if( TRACK_MENU==GameMode ) {
+		// controls for Car Behaviour, Player 1
+        if( pad.buttonPressed(XINPUT_GAMEPAD_A) ) {
+            lastInput |= KEY_P1_LEFT;
+		} else if( pad.buttonPressed(XINPUT_GAMEPAD_A) ) {
+			lastInput &= ~KEY_P1_LEFT;
+		}
+
+        if( pad.buttonPressed(XINPUT_GAMEPAD_B) ) {
+            lastInput |= KEY_P1_RIGHT;
+		} else if( pad.buttonPressed(XINPUT_GAMEPAD_B) ) {
+			lastInput &= ~KEY_P1_RIGHT;
+		}
+
+        if( pad.buttonPressed(XINPUT_GAMEPAD_X) ) {
+            lastInput |= KEY_P1_HASH;
+		} else if( pad.buttonPressed(XINPUT_GAMEPAD_X) ) {
+			lastInput &= ~KEY_P1_HASH;
+		}
+	}
+	/*
+	if( pad.buttonPressed(XINPUT_GAMEPAD_LEFT_THUMB) ) {}
+	if( pad.buttonPressed(XINPUT_GAMEPAD_RIGHT_THUMB) ) {}
+	if( pad.buttonPressed(XINPUT_GAMEPAD_LEFT_SHOULDER) ) {}
+	if( pad.buttonPressed(XINPUT_GAMEPAD_RIGHT_SHOULDER) ) {}
+	if( pad.buttonPressed(XINPUT_GAMEPAD_Y) ) {}*/
+}
+
+
+//--------------------------------------------------------------------------------------
+// As a convenience, DXUT inspects the incoming windows messages for
+// keystroke messages and decodes the message parameters to pass relevant keyboard
+// messages to the application.  The framework does not remove the underlying keystroke 
+// messages, which are still passed to the application's MsgProc callback.
+//--------------------------------------------------------------------------------------
 void CALLBACK KeyboardProc( UINT nChar, bool bKeyDown, bool bAltDown, void *pUserContext )
 {
     if( bKeyDown )
@@ -1475,7 +1555,7 @@ void CALLBACK KeyboardProc( UINT nChar, bool bKeyDown, bool bAltDown, void *pUse
 		case 'M':
 			if (GameMode != TRACK_MENU)
 			{
-				GameMode = TRACK_MENU;
+				setGameMode(TRACK_MENU);
 
 				opponentsID = NO_OPPONENT;
 

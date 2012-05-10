@@ -52,7 +52,7 @@
 #include "Opponent Behaviour.h"
 #include "Track.h"
 #include "3D Engine.h"
-#include "XBOXCOntroller.h"
+#include "XBOXController.h"
 
 /*	===== */
 /*	Debug */
@@ -118,9 +118,6 @@ long car_collision_x_acceleration,
 
 long boostReserve = 0, boostUnit = 0;
 long playerLapNumber;
-
-static CXBOXController P1Controller(1);
-
 
 #if defined(DEBUG) || defined(_DEBUG)
 //long CCPIECE, CCSEGMENT, CCSURFACEX, CCSURFACEZ;
@@ -242,7 +239,7 @@ static long AmigaRecordingFrame = 0;
 /*	===================== */
 /*	Function declarations */
 /*	===================== */
-static void CarControl (DWORD input);
+static void CarControl (DWORD input, CXBOXController &pad);
 static void BoostPower (long boost_flag,
 						long accelerate,
 						long brake);
@@ -489,6 +486,7 @@ long INITIALISE_PLAYER = TRUE;
 
 
 void CarBehaviour (DWORD input,
+				   CXBOXController &pad,
 				   long *x,
 				   long *y,
 				   long *z,
@@ -589,7 +587,7 @@ void CarBehaviour (DWORD input,
 		}
 #endif
 
-	CarControl(input);
+	CarControl(input, pad);
 	CarMovement();
 	UpdateEngineRevs();
 
@@ -754,7 +752,7 @@ void LimitViewpointY (long *y)
 /*	Description:							*/
 /*	======================================================================================= */
 
-static void CarControl (DWORD input)
+static void CarControl (DWORD input, CXBOXController &pad)
 	{
 //	Keys that control car are :-
 //			S = left, D = right
@@ -792,30 +790,26 @@ static void CarControl (DWORD input)
 	// if none of the resulting keys are pressed then read joystick
 	if( !input )
 	{
-		if(P1Controller.IsConnected())
+		// easier to read...
+		if(pad.rightTriggerDown())
 		{
-			// easier to read...
-			const XINPUT_GAMEPAD &pad = P1Controller.GetState().Gamepad;
-			if(pad.bRightTrigger)
-			{
-				accelerate = TRUE;
-			}
+			accelerate = TRUE;
+		}
 
-			if(pad.wButtons & XINPUT_GAMEPAD_A)
-			{
-				boost = TRUE;
-			}
+		if(pad.buttonDown(XINPUT_GAMEPAD_A))
+		{
+			boost = TRUE;
+		}
 
-			if(pad.wButtons & XINPUT_GAMEPAD_B || pad.bLeftTrigger)
-			{
-				brake = TRUE;	// select brake
-				accelerate = FALSE;
-			}
+		if(pad.buttonDown(XINPUT_GAMEPAD_B) || pad.leftTriggerDown())
+		{
+			brake = TRUE;	// select brake
+			accelerate = FALSE;
+		}
 
-			if( abs(pad.sThumbLX) > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE )
-			{
-				(pad.sThumbLX < 0) ? (left = TRUE) : (right = TRUE);
-			}
+		if( abs(pad.thumbLX()) > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE )
+		{
+			(pad.thumbLX() < 0) ? (left = TRUE) : (right = TRUE);
 		}
 	}
 

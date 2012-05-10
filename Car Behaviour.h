@@ -32,12 +32,18 @@ typedef enum
 /*	Structure definitions */
 /*	===================== */
 
+/*	===================== */
+/*	Forward Declarations  */
+/*	===================== */
+class CXBOXController;
+
 /*	============================== */
 /*	External function declarations */
 /*	============================== */
 extern void ResetPlayer (void);
 
 extern void CarBehaviour (DWORD input,
+						  CXBOXController &pad,
 						  long *x,
 						  long *y,
 						  long *z,
