@@ -775,7 +775,48 @@ long x_offset, y_offset, z_offset;
 //--------------------------------------------------------------------------------------
 // Handle updates to the scene
 //--------------------------------------------------------------------------------------
-static D3DXMATRIX matWorldTrack, matWorldCar, matWorldOpponentsCar;
+
+struct MTXInterpolator
+{
+	D3DXMATRIX oldMatTrans, newMatTrans;
+	D3DXQUATERNION oldQuatRot, newQuatRot;
+
+	void UpdateMatrices(const D3DMATRIX &newTrans, const D3DMATRIX &newRot)
+	{
+		oldMatTrans = newMatTrans;
+		oldQuatRot  = newQuatRot;
+		
+		newMatTrans = newTrans;
+		D3DXMATRIX newRotX = newRot;
+		D3DXQuaternionRotationMatrix(&newQuatRot, &newRotX);		
+	}
+
+	D3DXMATRIX CreateInterpolatedMtx(float f, bool view=false)
+	{
+		D3DXMATRIX result;
+		D3DXMATRIX trans = oldMatTrans + f * ( newMatTrans - oldMatTrans); 
+
+		D3DXQUATERNION rotQ;
+		D3DXQuaternionSlerp( &rotQ, &oldQuatRot, &newQuatRot, f);
+		D3DXMATRIX rot;
+		D3DXMatrixRotationQuaternion( &rot, &rotQ);
+
+		if (view)
+			D3DXMatrixMultiply(&result, &trans, &rot);
+		else
+			D3DXMatrixMultiply(&result, &rot, &trans);
+		return result;
+	}
+};
+
+
+MTXInterpolator InterpolatorView;
+MTXInterpolator InterpolatorCarOwn;
+MTXInterpolator InterpolatorCarOpponent;
+
+
+
+static D3DXMATRIX matWorldTrack;
 
 
 static void SetCarWorldTransform( void )
@@ -797,9 +838,8 @@ D3DXMATRIX matRot, matTemp, matTrans;
 	// Position car slightly higher than wheel height (VCAR_HEIGHT/4) so wheels are fully visible
 	D3DXMatrixTranslation( &matTrans, (float)(player1_x>>LOG_PRECISION), (float)(-player1_y>>LOG_PRECISION)+VCAR_HEIGHT/3, (float)(player1_z>>LOG_PRECISION) );
 	// Combine the rotation and translation matrices to complete the world matrix
-	D3DXMatrixMultiply(&matWorldCar, &matRot, &matTrans);
+	InterpolatorCarOwn.UpdateMatrices(matTrans, matRot);
 }
-
 
 static void SetOpponentsCarWorldTransform( void )
 {
@@ -820,7 +860,7 @@ D3DXMATRIX matRot, matTemp, matTrans;
 	// Position car at wheel height (VCAR_HEIGHT/4)
 	D3DXMatrixTranslation( &matTrans, (float)(opponent_x>>LOG_PRECISION), (float)(-opponent_y>>LOG_PRECISION)+VCAR_HEIGHT/4, (float)(opponent_z>>LOG_PRECISION) );
 	// Combine the rotation and translation matrices to complete the world matrix
-	D3DXMatrixMultiply(&matWorldOpponentsCar, &matRot, &matTrans);
+	InterpolatorCarOpponent.UpdateMatrices(matTrans, matRot);
 }
 
 
@@ -835,9 +875,53 @@ static void StopEngineSound( void )
 	}
 }
 
+struct Ticker
+{
+	Ticker(float newFPS)
+	{
+		SetTargetFPS(newFPS);
+	}
+
+	void SetTargetFPS(float newFPS)
+	{
+		TargetFPS = newFPS;
+		TickDuration = 1.0f / TargetFPS;
+		TickFraction = 0.0f;
+		TickPercent  = 0.0f;
+		DoFrame = true;
+	}
+
+	void Update(float elapsedSeconds)
+	{
+		TickFraction += elapsedSeconds;
+
+		float fullFrames = TickFraction / TickDuration;
+		DoFrame = fullFrames>=1.0f;
+		
+		if (DoFrame)
+			TickFraction -= TickDuration;
+		
+		TickPercent = TickFraction/TickDuration;
+	}
+
+	float TargetFPS;
+	float TickDuration;
+	float TickFraction;
+	float TickPercent;
+	bool  DoFrame;
+};
+
+
+Ticker GameTicker(10.0f);
+Ticker SoundTicker(50.0f);
+
 
 void CALLBACK OnFrameMove( IDirect3DDevice9 *pd3dDevice, double fTime, float fElapsedTime, void *pUserContext )
 {
+	//char str[512];
+	//sprintf(str, "fTime: %f %f %f\n", fTime, fElapsedTime, TickFraction);
+	//OutputDebugStringA(str);
+
 static D3DXVECTOR3 vUpVec( 0.0f, 1.0f, 0.0f );
 static long frameCount = 0;
 DWORD input = lastInput;	// take copy of user input
@@ -863,25 +947,55 @@ D3DXMATRIX matRot, matTemp, matTrans, matView;
 	// Track preview and game mode run at reduced frame rate
 	if ((GameMode == TRACK_PREVIEW) || (GameMode == GAME_IN_PROGRESS))
 	{
+		GameTicker.Update(fElapsedTime);
+		SoundTicker.Update(fElapsedTime);
+
 		if (GameMode == GAME_IN_PROGRESS)
 		{
 			// Following function should run at 50Hz
-			if (!bPaused) FramesWheelsEngine(EngineSoundBuffers);
+			if (!bPaused && SoundTicker.DoFrame) FramesWheelsEngine(EngineSoundBuffers);
 		}
 
-		if (frameCount > 0)
-			--frameCount;
+		if (!GameTicker.DoFrame)
+		{
+			if (GameMode==GAME_IN_PROGRESS)
+			{
+				D3DMATRIX viewMtx = InterpolatorView.CreateInterpolatedMtx(GameTicker.TickPercent, true);
+			    pd3dDevice->SetTransform( D3DTS_VIEW, &viewMtx );
+			}
 
-		if (frameCount == 0)
+			if (GameMode==TRACK_PREVIEW)
 		{
-			frameCount = frameGap;
-			//DXUTPause( false, false );	//pausing doesn't work properly
+				//
+				// Set the view transform matrix
+				//
+				// Set the eye point
+				D3DXVECTOR3 vEyePt( (float)viewpoint1_x, (float)(-viewpoint1_y>>LOG_PRECISION), (float)viewpoint1_z );
+				// Set the lookat point
+				D3DXMATRIX carMtx = InterpolatorCarOpponent.CreateInterpolatedMtx(GameTicker.TickPercent);
+				D3DXVECTOR3 vLookatPt( carMtx._41, carMtx._42, carMtx._43 );
+				D3DXMatrixLookAtLH( &matView, &vEyePt, &vLookatPt, &vUpVec );
+
+				pd3dDevice->SetTransform( D3DTS_VIEW, &matView );
 		}
-		else
-		{
-			//if (frameCount == frameGap-1) DXUTPause( true, true );	//pausing doesn't work properly
+
 			return;
 		}
+		
+
+		//if (frameCount > 0)
+		//	--frameCount;
+
+		//if (frameCount == 0)
+		//{
+		//	frameCount = frameGap;
+		//	//DXUTPause( false, false );	//pausing doesn't work properly
+		//}
+		//else
+		//{
+		//	//if (frameCount == frameGap-1) DXUTPause( true, true );	//pausing doesn't work properly
+		//	return;
+		//}
 	}
 	else if (GameMode == TRACK_MENU)
 	{
@@ -958,8 +1072,22 @@ D3DXMATRIX matRot, matTemp, matTrans, matView;
 		// Set the eye point
 		D3DXVECTOR3 vEyePt( (float)viewpoint1_x, (float)(-viewpoint1_y>>LOG_PRECISION), (float)viewpoint1_z );
 		// Set the lookat point
-		D3DXVECTOR3 vLookatPt( (float)target_x, (float)target_y, (float)target_z );
+		D3DXVECTOR3 vLookatPt;
+		if (GameMode==TRACK_MENU)
+		{
+			vLookatPt.x = (float)target_x;
+			vLookatPt.y = (float)target_y;
+			vLookatPt.z = (float)target_z;
+		}
+		else
+		{
+			D3DXMATRIX carMtx = InterpolatorCarOpponent.CreateInterpolatedMtx(GameTicker.TickPercent);
+			vLookatPt.x = carMtx._41;
+			vLookatPt.y = carMtx._42;
+			vLookatPt.z = carMtx._43;
+		}
 		D3DXMatrixLookAtLH( &matView, &vEyePt, &vLookatPt, &vUpVec );
+
 		pd3dDevice->SetTransform( D3DTS_VIEW, &matView );
 	}
 	else if (GameMode == GAME_IN_PROGRESS)
@@ -1012,8 +1140,12 @@ D3DXMATRIX matRot, matTemp, matTrans, matView;
 		D3DXMatrixRotationZ(&matTemp, za);
 		D3DXMatrixMultiply(&matRot, &matRot, &matTemp);
 		// Combine the rotation and translation matrices to complete the world matrix
-		D3DXMatrixMultiply(&matView, &matTrans, &matRot);
-		pd3dDevice->SetTransform( D3DTS_VIEW, &matView );
+		// update matrices for interpolation
+		InterpolatorView.UpdateMatrices(matTrans, matRot);
+		
+		//D3DXMatrixMultiply(&matView, &matTrans, &matRot);
+		D3DMATRIX viewMtx = InterpolatorView.CreateInterpolatedMtx(GameTicker.TickPercent, true);
+		pd3dDevice->SetTransform( D3DTS_VIEW, &viewMtx );
 	}
 
 	if (!bPaused)
@@ -1346,7 +1478,7 @@ HRESULT hr;
 //    V( pd3dDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_ARGB(0, 45, 50, 170), 1.0f, 0) );
 
     // Clear the zbuffer
-    V( pd3dDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER, 0, 1.0f, 0) );
+    V( pd3dDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER|D3DCLEAR_TARGET, 0xff444488, 1.0f, 0) );
 
     // Render the scene
     if( SUCCEEDED( pd3dDevice->BeginScene() ) )
@@ -1370,21 +1502,28 @@ HRESULT hr;
 				break;
 
 			case TRACK_PREVIEW:
+				{
 				// Draw Opponent's Car
-				pd3dDevice->SetTransform( D3DTS_WORLD, &matWorldOpponentsCar );
+					D3DMATRIX mtx = InterpolatorCarOpponent.CreateInterpolatedMtx(GameTicker.TickPercent);
+					pd3dDevice->SetTransform( D3DTS_WORLD, &mtx );
 				DrawCar(pd3dDevice);
+				}
 				break;
 
 			case GAME_IN_PROGRESS:
 			case GAME_OVER:
+				{
 				// Draw Opponent's Car
-				pd3dDevice->SetTransform( D3DTS_WORLD, &matWorldOpponentsCar );
+					D3DMATRIX mtx = InterpolatorCarOpponent.CreateInterpolatedMtx(GameTicker.TickPercent);
+					pd3dDevice->SetTransform( D3DTS_WORLD, &mtx );
 				DrawCar(pd3dDevice);
+				}
 
 				if (bOutsideView)
 				{
 				// Draw Player1's Car
-				pd3dDevice->SetTransform( D3DTS_WORLD, &matWorldCar );
+					D3DMATRIX mtx = InterpolatorCarOwn.CreateInterpolatedMtx(GameTicker.TickPercent);
+					pd3dDevice->SetTransform( D3DTS_WORLD, &mtx );
 				DrawCar(pd3dDevice);
 				}
 				break;
@@ -1627,7 +1766,7 @@ INT WINAPI WinMain( HINSTANCE, HINSTANCE, LPSTR, int )
 	    return DXUTGetExitCode();
 
     // Initialize DXUT and create the desired Win32 window and Direct3D device for the application
-    DXUTInit( true, true, true, false ); // Parse the command line, handle the default hotkeys, show msgboxes, don't handle Alt-Enter
+    DXUTInit( true, true, true, true ); // Parse the command line, handle the default hotkeys, show msgboxes, don't handle Alt-Enter
     DXUTSetCursorSettings( true, true ); // Show the cursor and clip it when in full screen
     DXUTCreateWindow( L"StuntCarRacer" );
     DXUTCreateDevice( D3DADAPTER_DEFAULT, true, 640, 480, IsDeviceAcceptable, ModifyDeviceSettings );
