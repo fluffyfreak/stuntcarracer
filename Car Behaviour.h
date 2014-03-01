@@ -22,11 +22,11 @@
 #define	INCREASE	276		// (276/256)
 
 typedef enum
-	{
+{
 	OPPONENT = 0,
 	PLAYER,
 	NUM_CARS
-	} CarType;
+} CarType;
 
 /*	===================== */
 /*	Structure definitions */
@@ -35,32 +35,32 @@ typedef enum
 /*	============================== */
 /*	External function declarations */
 /*	============================== */
-extern void ResetPlayer (void);
+extern void ResetPlayer(void);
 
-extern void CarBehaviour (DWORD input,
-						  long *x,
-						  long *y,
-						  long *z,
-						  long *x_angle,
-						  long *y_angle,
-						  long *z_angle);
+extern void CarBehaviour(DWORD input,
+	long *x,
+	long *y,
+	long *z,
+	long *x_angle,
+	long *y_angle,
+	long *z_angle);
 
-extern void LimitViewpointY (long *y);
+extern void LimitViewpointY(long *y);
 
-extern long AmigaVolumeToDirectX (long amiga_volume);
+extern long AmigaVolumeToDirectX(long amiga_volume);
 
-extern long CalculateDisplaySpeed (void);
+extern long CalculateDisplaySpeed(void);
 
-extern void FramesWheelsEngine (IDirectSoundBuffer8 *engineSoundBuffers[]);
-extern void EngineSoundStopped (void);
+extern void FramesWheelsEngine(IDirectSoundBuffer8 *engineSoundBuffers []);
+extern void EngineSoundStopped(void);
 
-extern void CalculatePlayersRoadPosition (void);
+extern void CalculatePlayersRoadPosition(void);
 
-extern void DrawOtherGraphics (void);
-extern void UpdateDamage (void);
+extern void DrawOtherGraphics(void);
+extern void UpdateDamage(void);
 
-extern void ResetLapData (long car);
-extern void UpdateLapData (void);
+extern void ResetLapData(long car);
+extern void UpdateLapData(void);
 
 #ifdef USE_AMIGA_RECORDING
 extern void RequestGameReplay (void);

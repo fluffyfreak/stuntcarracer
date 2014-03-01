@@ -1,8 +1,8 @@
 /**************************************************************************
 
-    3D Engine.cpp - Functions for producing 3D graphics
+	3D Engine.cpp - Functions for producing 3D graphics
 
- **************************************************************************/
+	**************************************************************************/
 
 /*	============= */
 /*	Include files */
@@ -57,9 +57,9 @@ long TEMPZ[MAX_POLY_SIDES];
 /*	===================== */
 /*	Function declarations */
 /*	===================== */
-static long LockAngle( long opposite,
-					   long adjacent,
-					   long clockwise );
+static long LockAngle(long opposite,
+	long adjacent,
+	long clockwise);
 
 /*	======================================================================================= */
 /*	Function:		CreateSinCosTable														*/
@@ -67,22 +67,22 @@ static long LockAngle( long opposite,
 /*	Description:	Calculate and store sine/cosine values needed for 3D rotation			*/
 /*	======================================================================================= */
 
-void CreateSinCosTable( void )
-	{
+void CreateSinCosTable(void)
+{
 	long i;
 	double angle, step, value;
 
 	angle = 0;
-	step = ((double)2 * (double)PI) / (double)MAX_ANGLE;
-	for ( i = 0; i < SIN_COS_TABLE_SIZE; i++ )
-		{
-		value = sin( angle );
-		value = value * (double)PRECISION;
+	step = ((double) 2 * (double) PI) / (double) MAX_ANGLE;
+	for (i = 0; i < SIN_COS_TABLE_SIZE; i++)
+	{
+		value = sin(angle);
+		value = value * (double) PRECISION;
 
-		Sin_Cos[i] = (short)value;
+		Sin_Cos[i] = (short) value;
 		angle += step;
-		}
 	}
+}
 
 /*	======================================================================================= */
 /*	Function:		GetSinCos																*/
@@ -90,13 +90,13 @@ void CreateSinCosTable( void )
 /*	Description:	Provide sine/cosine of supplied angle									*/
 /*	======================================================================================= */
 
-void GetSinCos( long angle,
-				short *sin,
-				short *cos )
-	{
+void GetSinCos(long angle,
+	short *sin,
+	short *cos)
+{
 	*sin = Sin_Cos[angle];
-	*cos = Sin_Cos[angle + (MAX_ANGLE/4)];
-	}
+	*cos = Sin_Cos[angle + (MAX_ANGLE / 4)];
+}
 
 #ifdef NOT_USED
 /*	======================================================================================= */
@@ -106,13 +106,13 @@ void GetSinCos( long angle,
 /*	======================================================================================= */
 
 void SetWorldOffset( long x_offset,
-					 long y_offset,
-					 long z_offset )
-	{
+	long y_offset,
+	long z_offset )
+{
 	World_X_Offset = x_offset;
 	World_Y_Offset = y_offset;
 	World_Z_Offset = z_offset;
-	}
+}
 
 /*	======================================================================================= */
 /*	Function:		SetCoords																*/
@@ -121,11 +121,11 @@ void SetWorldOffset( long x_offset,
 /*	======================================================================================= */
 
 void SetCoords( COORD_3D *tptr,
-				COORD_2D *sptr )
-	{
+	COORD_2D *sptr )
+{
 	Transformed_Coords = tptr;
 	Screen_Coords = sptr;
-	}
+}
 
 /*	======================================================================================= */
 /*	Function:		DefaultCoords															*/
@@ -134,10 +134,10 @@ void SetCoords( COORD_3D *tptr,
 /*	======================================================================================= */
 
 void DefaultCoords( void )
-	{
+{
 	Transformed_Coords = Default_Transformed_Coords;
 	Screen_Coords = Default_Screen_Coords;
-	}
+}
 #endif
 /*	======================================================================================= */
 /*	Function:		CalcYXZTrigCoefficients													*/
@@ -150,10 +150,10 @@ void DefaultCoords( void )
 /*							Z-Rotation - Anti-Clockwise										*/
 /*	======================================================================================= */
 
-void CalcYXZTrigCoefficients( long x_angle,
-							  long y_angle,
-							  long z_angle )
-	{
+void CalcYXZTrigCoefficients(long x_angle,
+	long y_angle,
+	long z_angle)
+{
 	short sin_x, sin_y, sin_z;
 	short cos_x, cos_y, cos_z;
 
@@ -164,9 +164,9 @@ void CalcYXZTrigCoefficients( long x_angle,
 	sin_y = Sin_Cos[y_angle];
 	sin_z = Sin_Cos[z_angle];
 
-	cos_x = Sin_Cos[x_angle + (MAX_ANGLE/4)];
-	cos_y = Sin_Cos[y_angle + (MAX_ANGLE/4)];
-	cos_z = Sin_Cos[z_angle + (MAX_ANGLE/4)];
+	cos_x = Sin_Cos[x_angle + (MAX_ANGLE / 4)];
+	cos_y = Sin_Cos[y_angle + (MAX_ANGLE / 4)];
+	cos_z = Sin_Cos[z_angle + (MAX_ANGLE / 4)];
 
 	/*	================================ */
 	/*	Calculate rotated x coefficients */
@@ -176,9 +176,9 @@ void CalcYXZTrigCoefficients( long x_angle,
 	Trig_Coeffs[X_Y_COMP] = -(cos_x * sin_z) / PRECISION;
 	Trig_Coeffs[X_Z_COMP] = ((sin_y * cos_z) + (((sin_x * cos_y) / PRECISION) * sin_z)) / PRECISION;
 	*/
-	Trig_Coeffs[X_X_COMP] = (short)(((cos_y * cos_z) + (((sin_x * sin_y) / PRECISION) * sin_z)) / PRECISION);
-	Trig_Coeffs[X_Y_COMP] = (short)(-(cos_x * sin_z) / PRECISION);
-	Trig_Coeffs[X_Z_COMP] = (short)((-(sin_y * cos_z) + (((sin_x * cos_y) / PRECISION) * sin_z)) / PRECISION);
+	Trig_Coeffs[X_X_COMP] = (short) (((cos_y * cos_z) + (((sin_x * sin_y) / PRECISION) * sin_z)) / PRECISION);
+	Trig_Coeffs[X_Y_COMP] = (short) (-(cos_x * sin_z) / PRECISION);
+	Trig_Coeffs[X_Z_COMP] = (short) ((-(sin_y * cos_z) + (((sin_x * cos_y) / PRECISION) * sin_z)) / PRECISION);
 
 	/*	================================ */
 	/*	Calculate rotated y coefficients */
@@ -188,9 +188,9 @@ void CalcYXZTrigCoefficients( long x_angle,
 	Trig_Coeffs[Y_Y_COMP] = (cos_x * cos_z) / PRECISION;
 	Trig_Coeffs[Y_Z_COMP] = ((sin_y * sin_z) - (((sin_x * cos_y) / PRECISION) * cos_z)) / PRECISION;
 	*/
-	Trig_Coeffs[Y_X_COMP] = (short)(((cos_y * sin_z) - (((sin_x * sin_y) / PRECISION) * cos_z)) / PRECISION);
-	Trig_Coeffs[Y_Y_COMP] = (short)((cos_x * cos_z) / PRECISION);
-	Trig_Coeffs[Y_Z_COMP] = (short)((-(sin_y * sin_z) - (((sin_x * cos_y) / PRECISION) * cos_z)) / PRECISION);
+	Trig_Coeffs[Y_X_COMP] = (short) (((cos_y * sin_z) - (((sin_x * sin_y) / PRECISION) * cos_z)) / PRECISION);
+	Trig_Coeffs[Y_Y_COMP] = (short) ((cos_x * cos_z) / PRECISION);
+	Trig_Coeffs[Y_Z_COMP] = (short) ((-(sin_y * sin_z) - (((sin_x * cos_y) / PRECISION) * cos_z)) / PRECISION);
 
 	/*	================================ */
 	/*	Calculate rotated z coefficients */
@@ -200,10 +200,10 @@ void CalcYXZTrigCoefficients( long x_angle,
 	Trig_Coeffs[Z_Y_COMP] = sin_x;
 	Trig_Coeffs[Z_Z_COMP] = (cos_x * cos_y) / PRECISION;
 	*/
-	Trig_Coeffs[Z_X_COMP] = (short)((cos_x * sin_y) / PRECISION);
+	Trig_Coeffs[Z_X_COMP] = (short) ((cos_x * sin_y) / PRECISION);
 	Trig_Coeffs[Z_Y_COMP] = sin_x;
-	Trig_Coeffs[Z_Z_COMP] = (short)((cos_x * cos_y) / PRECISION);
-	}
+	Trig_Coeffs[Z_Z_COMP] = (short) ((cos_x * cos_y) / PRECISION);
+}
 
 /*	======================================================================================= */
 /*	Function:		TrigCoefficients														*/
@@ -211,10 +211,10 @@ void CalcYXZTrigCoefficients( long x_angle,
 /*	Description:	Return ptr. to coefficients needed for 3D rotation						*/
 /*	======================================================================================= */
 
-short *TrigCoefficients( void )
-	{
+short *TrigCoefficients(void)
+{
 	return(Trig_Coeffs);
-	}
+}
 
 /*	======================================================================================= */
 /*	Function:		RotateCoordinate														*/
@@ -223,9 +223,9 @@ short *TrigCoefficients( void )
 /*	======================================================================================= */
 #ifdef NOT_USED
 void RotateCoordinate( long *xptr,
-					   long *yptr,
-					   long *zptr )
-	{
+	long *yptr,
+	long *zptr )
+{
 	long x, y, z;
 
 	x = *xptr;
@@ -233,17 +233,17 @@ void RotateCoordinate( long *xptr,
 	z = *zptr;
 
 	*xptr = (x * (long)Trig_Coeffs[X_X_COMP]) +
-			(y * (long)Trig_Coeffs[X_Y_COMP]) +
-			(z * (long)Trig_Coeffs[X_Z_COMP]);
+		(y * (long)Trig_Coeffs[X_Y_COMP]) +
+		(z * (long)Trig_Coeffs[X_Z_COMP]);
 
 	*yptr = (x * (long)Trig_Coeffs[Y_X_COMP]) +
-			(y * (long)Trig_Coeffs[Y_Y_COMP]) +
-			(z * (long)Trig_Coeffs[Y_Z_COMP]);
+		(y * (long)Trig_Coeffs[Y_Y_COMP]) +
+		(z * (long)Trig_Coeffs[Y_Z_COMP]);
 
 	*zptr = (x * (long)Trig_Coeffs[Z_X_COMP]) +
-			(y * (long)Trig_Coeffs[Z_Y_COMP]) +
-			(z * (long)Trig_Coeffs[Z_Z_COMP]);
-	}
+		(y * (long)Trig_Coeffs[Z_Y_COMP]) +
+		(z * (long)Trig_Coeffs[Z_Z_COMP]);
+}
 #endif
 /*	======================================================================================= */
 /*	Function:		WorldOffset (opposite of RotateCoordinate)								*/
@@ -252,28 +252,28 @@ void RotateCoordinate( long *xptr,
 /*					for the given rotation (i.e. sums X/Y/Z components)						*/
 /*	======================================================================================= */
 
-void WorldOffset( long *xptr,
-				  long *yptr,
-				  long *zptr )
-	{
+void WorldOffset(long *xptr,
+	long *yptr,
+	long *zptr)
+{
 	long x, y, z;
 
 	x = *xptr;
 	y = *yptr;
 	z = *zptr;
 
-	*xptr = (x * (long)Trig_Coeffs[X_X_COMP]) +
-			(y * (long)Trig_Coeffs[Y_X_COMP]) +
-			(z * (long)Trig_Coeffs[Z_X_COMP]);
+	*xptr = (x * (long) Trig_Coeffs[X_X_COMP]) +
+		(y * (long) Trig_Coeffs[Y_X_COMP]) +
+		(z * (long) Trig_Coeffs[Z_X_COMP]);
 
-	*yptr = (x * (long)Trig_Coeffs[X_Y_COMP]) +
-			(y * (long)Trig_Coeffs[Y_Y_COMP]) +
-			(z * (long)Trig_Coeffs[Z_Y_COMP]);
+	*yptr = (x * (long) Trig_Coeffs[X_Y_COMP]) +
+		(y * (long) Trig_Coeffs[Y_Y_COMP]) +
+		(z * (long) Trig_Coeffs[Z_Y_COMP]);
 
-	*zptr = (x * (long)Trig_Coeffs[X_Z_COMP]) +
-			(y * (long)Trig_Coeffs[Y_Z_COMP]) +
-			(z * (long)Trig_Coeffs[Z_Z_COMP]);
-	}
+	*zptr = (x * (long) Trig_Coeffs[X_Z_COMP]) +
+		(y * (long) Trig_Coeffs[Y_Z_COMP]) +
+		(z * (long) Trig_Coeffs[Z_Z_COMP]);
+}
 
 /*	======================================================================================= */
 /*	Function:		TransformCoordinates													*/
@@ -282,8 +282,8 @@ void WorldOffset( long *xptr,
 /*	======================================================================================= */
 #ifdef NOT_USED
 long TransformCoordinates( COORD_3D *cptr,
-						   long size )
-	{
+	long size )
+{
 	long i, number;
 	long x, y, z;
 	long trans_x, trans_y, trans_z;
@@ -300,7 +300,7 @@ long TransformCoordinates( COORD_3D *cptr,
 
 	// transform each co-ordinate in turn
 	for (i = 0; i < number; i++)
-		{
+	{
 		x = cptr->x;
 		y = cptr->y;
 		z = cptr->z;
@@ -308,16 +308,16 @@ long TransformCoordinates( COORD_3D *cptr,
 
 		// rotate current co-ordinate
 		trans_x = (x * (long)Trig_Coeffs[X_X_COMP]) +
-				  (y * (long)Trig_Coeffs[X_Y_COMP]) +
-				  (z * (long)Trig_Coeffs[X_Z_COMP]);
+			(y * (long)Trig_Coeffs[X_Y_COMP]) +
+			(z * (long)Trig_Coeffs[X_Z_COMP]);
 
 		trans_y = (x * (long)Trig_Coeffs[Y_X_COMP]) +
-				  (y * (long)Trig_Coeffs[Y_Y_COMP]) +
-				  (z * (long)Trig_Coeffs[Y_Z_COMP]);
+			(y * (long)Trig_Coeffs[Y_Y_COMP]) +
+			(z * (long)Trig_Coeffs[Y_Z_COMP]);
 
 		trans_z = (x * (long)Trig_Coeffs[Z_X_COMP]) +
-				  (y * (long)Trig_Coeffs[Z_Y_COMP]) +
-				  (z * (long)Trig_Coeffs[Z_Z_COMP]);
+			(y * (long)Trig_Coeffs[Z_Y_COMP]) +
+			(z * (long)Trig_Coeffs[Z_Z_COMP]);
 
 		// add world offsets
 		trans_x += World_X_Offset;
@@ -338,14 +338,14 @@ long TransformCoordinates( COORD_3D *cptr,
 
 		// debug stuff
 		if (z == 0)
-			{
+		{
 #if defined(DEBUG) || defined(_DEBUG)
 			fprintf(out, "5.  Preventing division by zero\n");
 			//Sleep(10);
 #endif
 
 			z = 1;
-			}
+		}
 
 		x = (trans_x / z) + screen_width/2;
 		y = (trans_y / z) + screen_height/2;
@@ -353,10 +353,10 @@ long TransformCoordinates( COORD_3D *cptr,
 		// store screen x and screen y
 		Screen_Coords[i].x = x;
 		Screen_Coords[i].y = y;
-		}
+	}
 
 	return(TRUE);
-	}
+}
 
 /*	======================================================================================= */
 /*	Function:		TransformedZ															*/
@@ -365,9 +365,9 @@ long TransformCoordinates( COORD_3D *cptr,
 /*	======================================================================================= */
 
 long TransformedZ( long offset )
-	{
+{
 	return(Transformed_Coords[offset].z);
-	}
+}
 
 /*	======================================================================================= */
 /*	Function:		TexturedPolygon															*/
@@ -377,9 +377,9 @@ long TransformedZ( long offset )
 /*	======================================================================================= */
 
 long TexturedPolygon( long *cptr,			// pointer to co-ordinate offsets for polygon
-					  long sides,
-					  long *vptr )			// pointer to co-ordinate offsets for vectors
-	{										// in the order: origin, u, v
+	long sides,
+	long *vptr )			// pointer to co-ordinate offsets for vectors
+{										// in the order: origin, u, v
 	long offset;
 
 	long ox, oy, oz;		// origin of surface
@@ -406,11 +406,11 @@ long TexturedPolygon( long *cptr,			// pointer to co-ordinate offsets for polygo
 	vz = (Transformed_Coords[offset].z / PRECISION) - oz;
 
 	SetTextureVectors(ox, oy, oz,
-					  ux, uy, uz,
-					  vx, vy, vz);
+		ux, uy, uz,
+		vx, vy, vz);
 
 	return(Polygon(cptr, sides));
-	}
+}
 
 /*	======================================================================================= */
 /*	Function:		PolygonVisible															*/
@@ -419,7 +419,7 @@ long TexturedPolygon( long *cptr,			// pointer to co-ordinate offsets for polygo
 /*	======================================================================================= */
 
 long PolygonVisible( long *cptr )		// pointer to co-ordinate offsets for polygon
-	{
+{
 	long offset;
 	long x1, y1, x2, y2, x3, y3;
 
@@ -435,7 +435,7 @@ long PolygonVisible( long *cptr )		// pointer to co-ordinate offsets for polygon
 		return(TRUE);
 	else
 		return(FALSE);
-	}
+}
 
 /*	======================================================================================= */
 /*	Function:		Polygon																	*/
@@ -445,8 +445,8 @@ long PolygonVisible( long *cptr )		// pointer to co-ordinate offsets for polygon
 /*	======================================================================================= */
 
 long Polygon( long *cptr,			// pointer to co-ordinate offsets for polygon
-			  long sides )
-	{
+	long sides )
+{
 	long i, offset;
 	POINT points[MAX_POLY_SIDES];
 	long x1, y1, x2, y2, x3, y3;
@@ -457,13 +457,13 @@ long Polygon( long *cptr,			// pointer to co-ordinate offsets for polygon
 
 	// store all polygon's points
 	for (i = 0; i < sides; i++)
-		{
+	{
 		offset = *cptr++;
 		points[i].x = Screen_Coords[offset].x;
 		points[i].y = Screen_Coords[offset].y;
 
 		TEMPZ[i] = Transformed_Coords[offset].z;
-		}
+	}
 
 	// perform orientation test
 	x1 = points[0].x; y1 = points[0].y;
@@ -471,13 +471,13 @@ long Polygon( long *cptr,			// pointer to co-ordinate offsets for polygon
 	x3 = points[2].x; y3 = points[2].y;
 
 	if ((((x1 - x2) * (y3 - y2)) - ((x3 - x2) * (y1 - y2))) < 0)
-		{
+	{
 		DrawPolygon(points, sides);
 		return(TRUE);
-		}
+	}
 	else
 		return(FALSE);
-	}
+}
 
 /*	======================================================================================= */
 /*	Function:		PolygonEx (Polygon with orientation points specified explicitly)		*/
@@ -489,9 +489,9 @@ long Polygon( long *cptr,			// pointer to co-ordinate offsets for polygon
 // may also need TexturedPolygonEx
 
 long PolygonEx( long *cptr,			// pointer to co-ordinate offsets for polygon
-				long sides,
-				long *optr )		// pointer to co-ordinate offsets for orientation check
-	{								// (NOTE: these are offsets into the polygon's object,
+	long sides,
+	long *optr )		// pointer to co-ordinate offsets for orientation check
+{								// (NOTE: these are offsets into the polygon's object,
 	long i, offset;					//	rather than offsets into Screen_Coords
 	POINT points[MAX_POLY_SIDES];
 	long x1, y1, x2, y2, x3, y3;
@@ -502,13 +502,13 @@ long PolygonEx( long *cptr,			// pointer to co-ordinate offsets for polygon
 
 	// store all polygon's points
 	for (i = 0; i < sides; i++)
-		{
+	{
 		offset = *cptr++;
 		points[i].x = Screen_Coords[offset].x;
 		points[i].y = Screen_Coords[offset].y;
 
 		TEMPZ[i] = Transformed_Coords[offset].z;
-		}
+	}
 
 	// perform orientation test
 	offset = *optr++;
@@ -519,13 +519,13 @@ long PolygonEx( long *cptr,			// pointer to co-ordinate offsets for polygon
 	x3 = points[offset].x; y3 = points[offset].y;
 
 	if ((((x1 - x2) * (y3 - y2)) - ((x3 - x2) * (y1 - y2))) < 0)
-		{
+	{
 		DrawPolygon(points, sides);
 		return(TRUE);
-		}
+	}
 	else
 		return(FALSE);
-	}
+}
 
 /*	======================================================================================= */
 /*	Function:		Line																	*/
@@ -534,11 +534,11 @@ long PolygonEx( long *cptr,			// pointer to co-ordinate offsets for polygon
 /*	======================================================================================= */
 
 void Line( long c1,			// co-ordinate offset for line, point 1
-		   long c2 )		// co-ordinate offset for line, point 2
-	{
+	long c2 )		// co-ordinate offset for line, point 2
+{
 	long x1, y1, x2, y2, i, sides = 2;
-    D3DTLVERTEX TLVertices[2];
-    HRESULT err;
+	D3DTLVERTEX TLVertices[2];
+	HRESULT err;
 
 	x1 = Screen_Coords[c1].x;
 	y1 = Screen_Coords[c1].y;
@@ -546,28 +546,28 @@ void Line( long c1,			// co-ordinate offset for line, point 1
 	x2 = Screen_Coords[c2].x;
 	y2 = Screen_Coords[c2].y;
 
-    TLVertices[0].sx = (float)x1;      // screen x
-    TLVertices[0].sy = (float)y1;      // screen y
+	TLVertices[0].sx = (float)x1;      // screen x
+	TLVertices[0].sy = (float)y1;      // screen y
 
-    TLVertices[1].sx = (float)x2;      // screen x
-    TLVertices[1].sy = (float)y2;      // screen y
+	TLVertices[1].sx = (float)x2;      // screen x
+	TLVertices[1].sy = (float)y2;      // screen y
 
-    for (i = 0; i < sides; i++)
-        {
-        TLVertices[i].sz = (float)300.0;	// not needed unless Z buffering
-        TLVertices[i].rhw = (float)1.0;		// shouldn't be texture mapping a line
+	for (i = 0; i < sides; i++)
+	{
+		TLVertices[i].sz = (float)300.0;	// not needed unless Z buffering
+		TLVertices[i].rhw = (float)1.0;		// shouldn't be texture mapping a line
 
-        TLVertices[i].color = Line_Colour;
-        TLVertices[i].specular = RGB_MAKE(0,0,0);
-        }
+		TLVertices[i].color = Line_Colour;
+		TLVertices[i].specular = RGB_MAKE(0,0,0);
+	}
 
 	// texture vectors not needed, as again, shouldn't be texture mapping a line
-    TLVertices[0].tu = 0.0f; TLVertices[0].tv = 1.0f;
-    TLVertices[1].tu = 0.0f; TLVertices[1].tv = 0.0f;
+	TLVertices[0].tu = 0.0f; TLVertices[0].tv = 1.0f;
+	TLVertices[1].tu = 0.0f; TLVertices[1].tv = 0.0f;
 
-    //*** Use DrawPrimitive to draw the face
-    err = d3dDevice->DrawPrimitive(D3DPT_LINELIST, D3DVT_TLVERTEX, TLVertices, sides, D3DDP_WAIT);
-	}
+	//*** Use DrawPrimitive to draw the face
+	err = d3dDevice->DrawPrimitive(D3DPT_LINELIST, D3DVT_TLVERTEX, TLVertices, sides, D3DDP_WAIT);
+}
 
 /*	======================================================================================= */
 /*	Function:		PolygonZClipped															*/
@@ -585,10 +585,10 @@ static long resulting_sides;	// number left after clipping is complete
 static COORD_3D clipped_coords[MAX_POLY_SIDES+1];	// note that x,y are screen co-ordinates
 
 long PolygonZClipped( long *cptr,			// pointer to co-ordinate offsets for polygon
-					  long sides,
-					  long check_orientation,
-					  long *on_screen)	// optional output, may be NULL
-	{
+	long sides,
+	long check_orientation,
+	long *on_screen)	// optional output, may be NULL
+{
 	long boundary = Z_CLIP_BOUNDARY << LOG_PRECISION;
 	long i, offset, input_sides = sides;
 	long below;		// indicating if current co-ordinate is below/above z boundary
@@ -619,12 +619,12 @@ long PolygonZClipped( long *cptr,			// pointer to co-ordinate offsets for polygo
 	//fprintf(out, "Current (%d,%d,%d), below %d\n", current->x, current->y, current->z, below);
 
 	do
-		{
+	{
 		if (below)
-			{
+		{
 			// find first value above z boundary
 			do
-				{
+			{
 				previous = current;
 
 				// get pointer to next co-ordinate
@@ -634,15 +634,15 @@ long PolygonZClipped( long *cptr,			// pointer to co-ordinate offsets for polygo
 				//fprintf(out, "Below, Current (%d,%d,%d)\n", current->x, current->y, current->z);
 
 				--sides;
-				}
+			}
 			while ((sides > 0) && (current->z < boundary));
 
 			if (current->z >= boundary)
-				{
+			{
 				// clip edge that crosses boundary
 				ZClip(previous, current,	// below, above
-					  screen_width, screen_height,
-					  &x, &y);
+					screen_width, screen_height,
+					&x, &y);
 				// store boundary screen co-ordinate
 				clipped_coords[resulting_sides].x = x;
 				clipped_coords[resulting_sides].y = y;
@@ -651,15 +651,15 @@ long PolygonZClipped( long *cptr,			// pointer to co-ordinate offsets for polygo
 
 				//fprintf(out, "Below, ZClip gave (%d,%d), resulting sides %d\n",
 				//											x, y, resulting_sides);
-				}
+			}
 
 			below = FALSE;
-			}
+		}
 		else	// above
-			{
+		{
 			// find first value below z boundary
 			do
-				{
+			{
 				// store current screen co-ordinate (because it is above boundary)
 				clipped_coords[resulting_sides].x = Screen_Coords[offset].x;
 				clipped_coords[resulting_sides].y = Screen_Coords[offset].y;
@@ -675,15 +675,15 @@ long PolygonZClipped( long *cptr,			// pointer to co-ordinate offsets for polygo
 				//fprintf(out, "Above, Current (%d,%d,%d)\n", current->x, current->y, current->z);
 
 				--sides;
-				}
+			}
 			while ((sides > 0) && (current->z >= boundary));
 
 			if (current->z < boundary)
-				{
+			{
 				// clip edge that crosses boundary
 				ZClip(current, previous,	// below, above
-					  screen_width, screen_height,
-					  &x, &y);
+					screen_width, screen_height,
+					&x, &y);
 				// store boundary screen co-ordinate
 				clipped_coords[resulting_sides].x = x;
 				clipped_coords[resulting_sides].y = y;
@@ -692,21 +692,21 @@ long PolygonZClipped( long *cptr,			// pointer to co-ordinate offsets for polygo
 
 				//fprintf(out, "Above, ZClip gave (%d,%d), resulting sides %d\n",
 				//											x, y, resulting_sides);
-				}
+			}
 
 			below = TRUE;
-			}
 		}
+	}
 	while (sides > 0);
 
 
 	// clipping finished, draw resulting polygon if visible
 	if (resulting_sides == 0)
-		{
+	{
 		//fprintf(out, "PolygonZClipped - zero resulting sides\n");
 
 		return(FALSE);
-		}
+	}
 
 	//fprintf(out, "PolygonZClipped - resulting sides %d\n", resulting_sides);
 
@@ -714,12 +714,12 @@ long PolygonZClipped( long *cptr,			// pointer to co-ordinate offsets for polygo
 	// copy from COORD_3D to POINT structure, as required by DrawPolygon
 	POINT points[MAX_POLY_SIDES+1];
 	for (i = 0; i < resulting_sides; i++)
-		{
+	{
 		points[i].x = clipped_coords[i].x;
 		points[i].y = clipped_coords[i].y;
 
 		TEMPZ[i] = clipped_coords[i].z;
-		}
+	}
 
 
 	// perform orientation test
@@ -732,27 +732,27 @@ long PolygonZClipped( long *cptr,			// pointer to co-ordinate offsets for polygo
 	visible = (((x1 - x2) * (y3 - y2)) - ((x3 - x2) * (y1 - y2))) < 0;
 
 
-//	Currently check orientation only if required, as it meant that closest
-//  road surfaces were not always drawn when they could have been
+	//	Currently check orientation only if required, as it meant that closest
+	//  road surfaces were not always drawn when they could have been
 	if (check_orientation == FALSE)
-		{
+	{
 		DrawPolygon(points, resulting_sides);
 		return(visible);
-		}
+	}
 
 
 	if (visible)
-		{
+	{
 		//fprintf(out, "PolygonZClipped about to DrawPolygon\n");
 		DrawPolygon(points, resulting_sides);
 		return(visible);
-		}
+	}
 	else
-		{
+	{
 		//fprintf(out, "PolygonZClipped failed orientation test, %d\n", temp);
 		return(visible);
-		}
 	}
+}
 
 /*	======================================================================================= */
 /*	Function:		LineZClipped															*/
@@ -762,16 +762,16 @@ long PolygonZClipped( long *cptr,			// pointer to co-ordinate offsets for polygo
 /*	======================================================================================= */
 
 void LineZClipped( long c1,			// co-ordinate offset for line, point 1
-				   long c2 )		// co-ordinate offset for line, point 2
-	{
+	long c2 )		// co-ordinate offset for line, point 2
+{
 	long boundary = Z_CLIP_BOUNDARY << LOG_PRECISION;
 	long point1_below,
-		 point2_below;		// indicating if co-ordinates are below/above z boundary
+		point2_below;		// indicating if co-ordinates are below/above z boundary
 	long screen_width, screen_height;
 	COORD_3D *point1, *point2;
 	long x1, y1, x2, y2, i, sides = 2;
-    D3DTLVERTEX TLVertices[2];
-    HRESULT err;
+	D3DTLVERTEX TLVertices[2];
+	HRESULT err;
 
 	//fprintf(out, "LineZClipped\n");
 
@@ -794,56 +794,56 @@ void LineZClipped( long c1,			// co-ordinate offset for line, point 1
 
 	// check point 1
 	if (point1_below)
-		{
+	{
 		// clip edge that crosses boundary
 		ZClip(point1, point2,	// below, above
-			  screen_width, screen_height,
-			  &x1, &y1);
-		}
+			screen_width, screen_height,
+			&x1, &y1);
+	}
 	else
-		{
+	{
 		// store current screen co-ordinate (because it is above boundary)
 		x1 = Screen_Coords[c1].x;
 		y1 = Screen_Coords[c1].y;
-		}
+	}
 
 	// check point 2
 	if (point2_below)
-		{
+	{
 		// clip edge that crosses boundary
 		ZClip(point2, point1,	// below, above
-			  screen_width, screen_height,
-			  &x2, &y2);
-		}
+			screen_width, screen_height,
+			&x2, &y2);
+	}
 	else
-		{
+	{
 		// store current screen co-ordinate (because it is above boundary)
 		x2 = Screen_Coords[c2].x;
 		y2 = Screen_Coords[c2].y;
-		}
+	}
 
-    TLVertices[0].sx = (float)x1;      // screen x
-    TLVertices[0].sy = (float)y1;      // screen y
+	TLVertices[0].sx = (float)x1;      // screen x
+	TLVertices[0].sy = (float)y1;      // screen y
 
-    TLVertices[1].sx = (float)x2;      // screen x
-    TLVertices[1].sy = (float)y2;      // screen y
+	TLVertices[1].sx = (float)x2;      // screen x
+	TLVertices[1].sy = (float)y2;      // screen y
 
-    for (i = 0; i < sides; i++)
-        {
-        TLVertices[i].sz = (float)300.0;	// not needed unless Z buffering
-        TLVertices[i].rhw = (float)1.0;		// shouldn't be texture mapping a line
+	for (i = 0; i < sides; i++)
+	{
+		TLVertices[i].sz = (float)300.0;	// not needed unless Z buffering
+		TLVertices[i].rhw = (float)1.0;		// shouldn't be texture mapping a line
 
-        TLVertices[i].color = Line_Colour;
-        TLVertices[i].specular = RGB_MAKE(0,0,0);
-        }
+		TLVertices[i].color = Line_Colour;
+		TLVertices[i].specular = RGB_MAKE(0,0,0);
+	}
 
 	// texture vectors not needed, as again, shouldn't be texture mapping a line
-    TLVertices[0].tu = 0.0f; TLVertices[0].tv = 1.0f;
-    TLVertices[1].tu = 0.0f; TLVertices[1].tv = 0.0f;
+	TLVertices[0].tu = 0.0f; TLVertices[0].tv = 1.0f;
+	TLVertices[1].tu = 0.0f; TLVertices[1].tv = 0.0f;
 
-    //*** Use DrawPrimitive to draw the face
-    err = d3dDevice->DrawPrimitive(D3DPT_LINELIST, D3DVT_TLVERTEX, TLVertices, sides, D3DDP_WAIT);
-	}
+	//*** Use DrawPrimitive to draw the face
+	err = d3dDevice->DrawPrimitive(D3DPT_LINELIST, D3DVT_TLVERTEX, TLVertices, sides, D3DDP_WAIT);
+}
 
 /*	======================================================================================= */
 /*	Function:		ZClip																	*/
@@ -853,12 +853,12 @@ void LineZClipped( long c1,			// co-ordinate offset for line, point 1
 /*	======================================================================================= */
 
 void ZClip( COORD_3D *below,	// transformed co-ordinate below boundary (i.e. nearest one)
-			COORD_3D *above,	// transformed co-ordinate above boundary (i.e. furthest one)
-			long screen_width,
-			long screen_height,
-			long *x,			// clipped x
-			long *y )			// clipped y
-	{
+	COORD_3D *above,	// transformed co-ordinate above boundary (i.e. furthest one)
+	long screen_width,
+	long screen_height,
+	long *x,			// clipped x
+	long *y )			// clipped y
+{
 	long xoff, xon;
 	long yoff, yon;
 	long zoff, zon;
@@ -877,12 +877,12 @@ void ZClip( COORD_3D *below,	// transformed co-ordinate below boundary (i.e. nea
 
 	// clip to boundary z = Z_CLIP_BOUNDARY
 	if ((zoff - zon) == 0)
-		{
+	{
 		fprintf(out, "6.  Preventing division by zero\n");
 		//Sleep(10);
 
 		++zoff;
-		}
+	}
 
 	screenx = (((xon - xoff) * (zoff - Z_CLIP_BOUNDARY)) / (zoff - zon)) + xoff;
 	screeny = (((yon - yoff) * (zoff - Z_CLIP_BOUNDARY)) / (zoff - zon)) + yoff;
@@ -894,7 +894,7 @@ void ZClip( COORD_3D *below,	// transformed co-ordinate below boundary (i.e. nea
 
 	*x = screenx;
 	*y = screeny;
-	}
+}
 #endif
 /*	======================================================================================= */
 /*	Function:		LockViewpointToTarget													*/
@@ -902,15 +902,15 @@ void ZClip( COORD_3D *below,	// transformed co-ordinate below boundary (i.e. nea
 /*	Description:	Calculate x/y angles required to place target within centre of view     */
 /*	======================================================================================= */
 
-void LockViewpointToTarget( long viewpoint_x,
-							long viewpoint_y,
-							long viewpoint_z,
-							long target_x,
-							long target_y,
-							long target_z,
-							long *viewpoint_x_angle,
-							long *viewpoint_y_angle )
-	{
+void LockViewpointToTarget(long viewpoint_x,
+	long viewpoint_y,
+	long viewpoint_z,
+	long target_x,
+	long target_y,
+	long target_z,
+	long *viewpoint_x_angle,
+	long *viewpoint_y_angle)
+{
 	long opp, adj;
 	double a, b, h;
 
@@ -920,77 +920,77 @@ void LockViewpointToTarget( long viewpoint_x,
 	*viewpoint_y_angle = LockAngle(opp, adj, FALSE);
 
 	// x angle
-	a = (double)((target_x - viewpoint_x) >> LOG_PRECISION);
-	b = (double)((target_z - viewpoint_z) >> LOG_PRECISION);
+	a = (double) ((target_x - viewpoint_x) >> LOG_PRECISION);
+	b = (double) ((target_z - viewpoint_z) >> LOG_PRECISION);
 	h = sqrt((a*a) + (b*b));
-	adj = (long)(h * PRECISION);
+	adj = (long) (h * PRECISION);
 	opp = target_y - viewpoint_y;
 	*viewpoint_x_angle = LockAngle(opp, adj, FALSE);
 
 	return;
-	}
+}
 
 
-static long LockAngle( long opposite,
-					   long adjacent,
-					   long clockwise )
-	{
+static long LockAngle(long opposite,
+	long adjacent,
+	long clockwise)
+{
 	long viewpoint_angle;
 	double o, a, radians, angle;
 
-	o = (double)opposite;
-	a = (double)adjacent;
+	o = (double) opposite;
+	a = (double) adjacent;
 
 	// use inverse tan to calculate basic angle in radians
 	if (a == 0)		// prevent division by zero
-		radians = (double)PI / (double)2;	// 90 degrees
+		radians = (double) PI / (double) 2;	// 90 degrees
 	else
-		radians = atan(o/a);	// inverse tan
+		radians = atan(o / a);	// inverse tan
 
 	// convert radians to internal angle (also round up)
-	angle = ((radians * (double)MAX_ANGLE) / ((double)2 * (double)PI));
+	angle = ((radians * (double) MAX_ANGLE) / ((double) 2 * (double) PI));
 	// convert to absolute and round up as follows (because abs() isn't for doubles)
 	if (angle > 0)
-		viewpoint_angle = (long)(angle + (double)0.5);
+		viewpoint_angle = (long) (angle + (double)0.5);
 	else
-		viewpoint_angle = (long)((double)0.5 - angle);
+		viewpoint_angle = (long) ((double)0.5 - angle);
 
 	// convert angle from first quadrant to full range
 	if (o >= 0)
-		{
+	{
 		if (a >= 0)
-			{
-			// first quadrant
-			viewpoint_angle = (long)angle;
-			}
-		else
-			{
-			// second quadrant
-			viewpoint_angle = (long)angle + _180_DEGREES;
-			}
-		}
-	else
 		{
-		if (a <= 0)
-			{
-			// third quadrant
-			viewpoint_angle = (long)angle + _180_DEGREES;
-			}
-		else
-			{
-			// fourth quadrant
-			viewpoint_angle = (long)angle + _360_DEGREES;
-			}
+			// first quadrant
+			viewpoint_angle = (long) angle;
 		}
+		else
+		{
+			// second quadrant
+			viewpoint_angle = (long) angle + _180_DEGREES;
+		}
+	}
+	else
+	{
+		if (a <= 0)
+		{
+			// third quadrant
+			viewpoint_angle = (long) angle + _180_DEGREES;
+		}
+		else
+		{
+			// fourth quadrant
+			viewpoint_angle = (long) angle + _360_DEGREES;
+		}
+	}
 
 	// default is anti-clockwise, so convert to clockwise if necessary
 	if (clockwise)
-		{
-		viewpoint_angle = (-viewpoint_angle) & (MAX_ANGLE-1);
-		}
+	{
+		viewpoint_angle = (-viewpoint_angle) & (MAX_ANGLE - 1);
+	}
 
 	return(viewpoint_angle);
-	}
+}
 
 /*	======================================================================================= */
 /*	Function:		CreatePolygonVertexBuffer,												*/
@@ -1003,20 +1003,20 @@ static long LockAngle( long opposite,
 
 struct TRANSFORMEDVERTEX
 {
-    FLOAT x, y, z, rhw; // The transformed position for the vertex.
-    DWORD color;        // The vertex color.
+	FLOAT x, y, z, rhw; // The transformed position for the vertex.
+	DWORD color;        // The vertex color.
 };
 #define D3DFVF_TRANSFORMEDVERTEX (D3DFVF_XYZRHW|D3DFVF_DIFFUSE)
 
 
 static IDirect3DVertexBuffer9 *pPolygonVB = NULL;
 
-HRESULT CreatePolygonVertexBuffer (IDirect3DDevice9 *pd3dDevice)
+HRESULT CreatePolygonVertexBuffer(IDirect3DDevice9 *pd3dDevice)
 {
 	if (pPolygonVB == NULL)
 	{
-		if( FAILED( pd3dDevice->CreateVertexBuffer( MAX_POLY_SIDES*sizeof(TRANSFORMEDVERTEX),
-				D3DUSAGE_WRITEONLY, D3DFVF_TRANSFORMEDVERTEX, D3DPOOL_DEFAULT, &pPolygonVB, NULL ) ) )
+		if (FAILED(pd3dDevice->CreateVertexBuffer(MAX_POLY_SIDES*sizeof(TRANSFORMEDVERTEX),
+			D3DUSAGE_WRITEONLY, D3DFVF_TRANSFORMEDVERTEX, D3DPOOL_DEFAULT, &pPolygonVB, NULL)))
 			return E_FAIL;
 	}
 
@@ -1024,55 +1024,55 @@ HRESULT CreatePolygonVertexBuffer (IDirect3DDevice9 *pd3dDevice)
 }
 
 
-void FreePolygonVertexBuffer (void)
+void FreePolygonVertexBuffer(void)
 {
 	if (pPolygonVB) pPolygonVB->Release(), pPolygonVB = NULL;
 }
 
 
 // Draw flat polygon (no z information)
-void DrawPolygon( POINT *pptr,
-				  long sides)
+void DrawPolygon(POINT *pptr,
+	long sides)
 {
-long i;
-IDirect3DDevice9 *pd3dDevice = DXUTGetD3DDevice();
-TRANSFORMEDVERTEX *pVertices;
+	long i;
+	IDirect3DDevice9 *pd3dDevice = DXUTGetD3DDevice();
+	TRANSFORMEDVERTEX *pVertices;
 
 	// finish if too many sides
 	if (sides > MAX_POLY_SIDES)
 		return;
 
-	if( FAILED( pPolygonVB->Lock( 0, sides*sizeof(TRANSFORMEDVERTEX), (void**)&pVertices, 0 ) ) )
+	if (FAILED(pPolygonVB->Lock(0, sides*sizeof(TRANSFORMEDVERTEX), (void**) &pVertices, 0)))
 		return;
 
-    for (i = 0; i < sides; i++)
-        {
-		pVertices[i].x = (float)pptr[i].x;      // screen x
-		pVertices[i].y = (float)pptr[i].y;      // screen y
+	for (i = 0; i < sides; i++)
+	{
+		pVertices[i].x = (float) pptr[i].x;      // screen x
+		pVertices[i].y = (float) pptr[i].y;      // screen y
 		pVertices[i].z = (float)0.5f;			// not needed unless Z buffering
 		pVertices[i].rhw = (float)1.0f;
 		pVertices[i].color = Fill_Colour;
-        }
+	}
 	pPolygonVB->Unlock();
 
-	pd3dDevice->SetStreamSource( 0, pPolygonVB, 0, sizeof(TRANSFORMEDVERTEX) );
-	pd3dDevice->SetFVF( D3DFVF_TRANSFORMEDVERTEX );
-	pd3dDevice->DrawPrimitive( D3DPT_TRIANGLEFAN, 0, sides-2 );
+	pd3dDevice->SetStreamSource(0, pPolygonVB, 0, sizeof(TRANSFORMEDVERTEX));
+	pd3dDevice->SetFVF(D3DFVF_TRANSFORMEDVERTEX);
+	pd3dDevice->DrawPrimitive(D3DPT_TRIANGLEFAN, 0, sides - 2);
 	return;
-	}
+}
 
 
-void DrawFilledRectangle( long x1, long y1, long x2, long y2, DWORD colour )
+void DrawFilledRectangle(long x1, long y1, long x2, long y2, DWORD colour)
 {
-HRESULT hr;
-D3DRECT rect;
-IDirect3DDevice9 *pd3dDevice = DXUTGetD3DDevice();
+	HRESULT hr;
+	D3DRECT rect;
+	IDirect3DDevice9 *pd3dDevice = DXUTGetD3DDevice();
 
 	rect.x1 = x1;
 	rect.y1 = y1;
 	// note that Clear fills up to, but not including, the right/bottom points of the rectangle
-	rect.x2 = x2+1;
-	rect.y2 = y2+1;
-	V( pd3dDevice->Clear(1, &rect, D3DCLEAR_TARGET, colour, 0, 0) );
+	rect.x2 = x2 + 1;
+	rect.y2 = y2 + 1;
+	V(pd3dDevice->Clear(1, &rect, D3DCLEAR_TARGET, colour, 0, 0));
 	return;
 }

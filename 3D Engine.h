@@ -49,102 +49,102 @@
 /*	Structure definitions */
 /*	===================== */
 typedef struct
-	{
+{
 	long	x;
 	long	y;
 	long	z;
-	} COORD_3D;
+} COORD_3D;
 
 typedef struct
-	{
+{
 	long	x;
 	long	y;
-	} COORD_2D;
+} COORD_2D;
 
 /*	============================== */
 /*	External function declarations */
 /*	============================== */
-extern void CreateSinCosTable( void );
+extern void CreateSinCosTable(void);
 
-extern void GetSinCos( long angle,
-					   short *sin,
-					   short *cos );
+extern void GetSinCos(long angle,
+	short *sin,
+	short *cos);
 
-extern void SetWorldOffset( long x_offset,
-							long y_offset,
-							long z_offset );
+extern void SetWorldOffset(long x_offset,
+	long y_offset,
+	long z_offset);
 
-extern void SetCoords( COORD_3D *tptr,
-					   COORD_2D *sptr );
+extern void SetCoords(COORD_3D *tptr,
+	COORD_2D *sptr);
 
-extern void DefaultCoords( void );
+extern void DefaultCoords(void);
 
-extern void CalcYXZTrigCoefficients( long x_angle,
-									 long y_angle,
-									 long z_angle );
+extern void CalcYXZTrigCoefficients(long x_angle,
+	long y_angle,
+	long z_angle);
 
-extern short *TrigCoefficients( void );
+extern short *TrigCoefficients(void);
 
-extern void RotateCoordinate( long *xptr,
-							  long *yptr,
-							  long *zptr );
+extern void RotateCoordinate(long *xptr,
+	long *yptr,
+	long *zptr);
 
-extern void WorldOffset( long *xptr,
-					     long *yptr,
-					     long *zptr );
+extern void WorldOffset(long *xptr,
+	long *yptr,
+	long *zptr);
 
-extern long TransformCoordinates( COORD_3D *cptr,
-								  long size );
+extern long TransformCoordinates(COORD_3D *cptr,
+	long size);
 
-extern long TransformedZ( long offset );
+extern long TransformedZ(long offset);
 
-extern long TexturedPolygon( long *cptr,
-							 long sides,
-							 long *vptr );
+extern long TexturedPolygon(long *cptr,
+	long sides,
+	long *vptr);
 
-extern long PolygonVisible( long *cptr );
+extern long PolygonVisible(long *cptr);
 
-extern long Polygon( long *cptr,
-					 long sides );
+extern long Polygon(long *cptr,
+	long sides);
 
-extern long PolygonEx( long *cptr,
-					   long sides,
-					   long *optr );
+extern long PolygonEx(long *cptr,
+	long sides,
+	long *optr);
 
-extern void Line( long c1,
-				  long c2 );
+extern void Line(long c1,
+	long c2);
 
-extern long PolygonZClipped( long *cptr,
-							 long sides,
-							 long check_orientation,
-							 long *on_screen );
+extern long PolygonZClipped(long *cptr,
+	long sides,
+	long check_orientation,
+	long *on_screen);
 
-extern void LineZClipped( long c1,
-						  long c2 );
+extern void LineZClipped(long c1,
+	long c2);
 
-extern void ZClip( COORD_3D *below,
-				   COORD_3D *above,
-				   long screen_width,
-				   long screen_height,
-				   long *x,
-				   long *y );
+extern void ZClip(COORD_3D *below,
+	COORD_3D *above,
+	long screen_width,
+	long screen_height,
+	long *x,
+	long *y);
 
-extern void LockViewpointToTarget( long viewpoint_x,
-								   long viewpoint_y,
-								   long viewpoint_z,
-								   long target_x,
-								   long target_y,
-								   long target_z,
-								   long *viewpoint_x_angle,
-								   long *viewpoint_y_angle );
+extern void LockViewpointToTarget(long viewpoint_x,
+	long viewpoint_y,
+	long viewpoint_z,
+	long target_x,
+	long target_y,
+	long target_z,
+	long *viewpoint_x_angle,
+	long *viewpoint_y_angle);
 
-extern HRESULT CreatePolygonVertexBuffer (IDirect3DDevice9 *pd3dDevice);
+extern HRESULT CreatePolygonVertexBuffer(IDirect3DDevice9 *pd3dDevice);
 
-extern void FreePolygonVertexBuffer (void);
+extern void FreePolygonVertexBuffer(void);
 
-extern void DrawPolygon( POINT *pptr,
-						 long sides );
+extern void DrawPolygon(POINT *pptr,
+	long sides);
 
-extern void DrawFilledRectangle( long x1, long y1, long x2, long y2, DWORD colour );
+extern void DrawFilledRectangle(long x1, long y1, long x2, long y2, DWORD colour);
 
 #endif	/* _3D_ENGINE */

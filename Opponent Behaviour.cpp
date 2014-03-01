@@ -2,7 +2,7 @@
 
   Opponent Behaviour.cpp - Functions relating to opponents's car behaviour
 
- **************************************************************************/
+  **************************************************************************/
 
 
 /*	============= */
@@ -47,12 +47,12 @@ extern bool bTestKey;
 #define LOCAL_Y_FACTOR	4
 
 typedef enum
-	{
+{
 	REAR_LEFT = 0,
 	REAR_RIGHT,
 	FRONT,
 	NUM_OPP_WHEEL_POSITIONS
-	} OppWheelPositionType;
+} OppWheelPositionType;
 
 /*	=========== */
 /*	Global data */
@@ -68,61 +68,61 @@ bool opponent_behind_player = FALSE;
 unsigned char opponents_speed_values[NUM_TRACKS][MAX_PIECES_PER_TRACK] =
 {
 	{
-	/* Little Ramp data */
-	0x76,0x6c,0x62,0x58,0x7a,0x7a,0x70,0x66,0x5c,0x52,0x48,0x48,0x48,0x7a,0x7a,0x7a,
-	0x7a,0x7a,0x7a,0x7a,0x70,0x66,0x5c,0x52,0x48,0x48,0x48,0x48,0x78,0x6e,0x64,0x5a,
-	0x50,0x46,0x7a,0x70,0x66,0x5c,0x52,0x48,0x48,0x48,0x48,0x7c
+		/* Little Ramp data */
+		0x76, 0x6c, 0x62, 0x58, 0x7a, 0x7a, 0x70, 0x66, 0x5c, 0x52, 0x48, 0x48, 0x48, 0x7a, 0x7a, 0x7a,
+		0x7a, 0x7a, 0x7a, 0x7a, 0x70, 0x66, 0x5c, 0x52, 0x48, 0x48, 0x48, 0x48, 0x78, 0x6e, 0x64, 0x5a,
+		0x50, 0x46, 0x7a, 0x70, 0x66, 0x5c, 0x52, 0x48, 0x48, 0x48, 0x48, 0x7c
 	},
 	{
-	/* Stepping Stones data */
-	0xf2,0xe8,0xde,0xd4,0x67,0x5d,0x53,0x49,0x3f,0x4b,0x41,0x41,0xc1,0xd2,0xc8,0xbe,
-	0xc7,0xbd,0xc5,0xbb,0xc4,0xba,0x55,0x4b,0x41,0x41,0x41,0x60,0x56,0x4c,0x42,0x7d,
-	0x7d,0x73,0x69,0x5f,0x55,0x4b,0x41,0x41,0x41,0xfd,0xfd,0xfd,0xf3,0x7d,0x7d,0x73,
-	0x69,0x5f,0x55,0x4b,0x41,0x41,0x41,0x7c
+		/* Stepping Stones data */
+		0xf2, 0xe8, 0xde, 0xd4, 0x67, 0x5d, 0x53, 0x49, 0x3f, 0x4b, 0x41, 0x41, 0xc1, 0xd2, 0xc8, 0xbe,
+		0xc7, 0xbd, 0xc5, 0xbb, 0xc4, 0xba, 0x55, 0x4b, 0x41, 0x41, 0x41, 0x60, 0x56, 0x4c, 0x42, 0x7d,
+		0x7d, 0x73, 0x69, 0x5f, 0x55, 0x4b, 0x41, 0x41, 0x41, 0xfd, 0xfd, 0xfd, 0xf3, 0x7d, 0x7d, 0x73,
+		0x69, 0x5f, 0x55, 0x4b, 0x41, 0x41, 0x41, 0x7c
 	},
 	{
-	/* Hump Back data */
-	0x52,0x4d,0x77,0x77,0x77,0x6d,0x63,0x59,0x4f,0x45,0x45,0x45,0x77,0x77,0x77,0x77,
-	0x77,0x77,0x77,0x6d,0x63,0x59,0x4f,0x45,0x45,0x45,0x56,0x4c,0x77,0x77,0x6d,0x63,
-	0x59,0x4f,0x45,0x45,0x45,0x4f,0x61,0x57,0x4d,0x45,0x4f,0x45,0x45,0x63,0x59,0x4f,
-	0x45,0x45,0x45,0x66,0x5c
+		/* Hump Back data */
+		0x52, 0x4d, 0x77, 0x77, 0x77, 0x6d, 0x63, 0x59, 0x4f, 0x45, 0x45, 0x45, 0x77, 0x77, 0x77, 0x77,
+		0x77, 0x77, 0x77, 0x6d, 0x63, 0x59, 0x4f, 0x45, 0x45, 0x45, 0x56, 0x4c, 0x77, 0x77, 0x6d, 0x63,
+		0x59, 0x4f, 0x45, 0x45, 0x45, 0x4f, 0x61, 0x57, 0x4d, 0x45, 0x4f, 0x45, 0x45, 0x63, 0x59, 0x4f,
+		0x45, 0x45, 0x45, 0x66, 0x5c
 	},
 	{
-	/* Big Ramp data */
-	0x7a,0x7a,0x7a,0x7a,0x7a,0x7a,0x70,0x66,0x5c,0x52,0x48,0x48,0x48,0x58,0x4e,0x4b,
-	0x69,0x5f,0x55,0x4b,0x46,0x66,0x5c,0x52,0x48,0x48,0x48,0x48,0x7e,0xf4,0xea,0xe0,
-	0xd6,0x7a,0x7a,0x70,0x66,0x5c,0x52,0x48,0x48,0x48,0x48,0x7c
+		/* Big Ramp data */
+		0x7a, 0x7a, 0x7a, 0x7a, 0x7a, 0x7a, 0x70, 0x66, 0x5c, 0x52, 0x48, 0x48, 0x48, 0x58, 0x4e, 0x4b,
+		0x69, 0x5f, 0x55, 0x4b, 0x46, 0x66, 0x5c, 0x52, 0x48, 0x48, 0x48, 0x48, 0x7e, 0xf4, 0xea, 0xe0,
+		0xd6, 0x7a, 0x7a, 0x70, 0x66, 0x5c, 0x52, 0x48, 0x48, 0x48, 0x48, 0x7c
 	},
 	{
-	/* Ski Jump data */
-	0x42,0xec,0xe2,0xd8,0x77,0x77,0x77,0x6d,0x63,0x59,0x4f,0x4f,0x4f,0x4f,0x63,0x59,
-	0x4f,0x4f,0x72,0x68,0x5e,0x54,0x4a,0x40,0x36,0x4f,0x4f,0x4f,0x6a,0xe0,0xd6,0xcc,
-	0xc2,0x63,0x59,0x4f,0xcf,0xcf,0xcf,0xc9,0x56,0x56,0x56,0x7e,0x7e,0x7e,0x7e,0x7e,
-	0x7e,0x74,0x6a,0x60,0x56,0x56,0x56,0x56,0x56,0x7e,0x7e,0x7e,0x7e,0x7e,0x7e,0x74,
-	0x6a,0x60,0x56,0x56,0x56,0x7e,0x7e,0x74,0x6a,0x60,0x56,0x56,0x5a,0x52
+		/* Ski Jump data */
+		0x42, 0xec, 0xe2, 0xd8, 0x77, 0x77, 0x77, 0x6d, 0x63, 0x59, 0x4f, 0x4f, 0x4f, 0x4f, 0x63, 0x59,
+		0x4f, 0x4f, 0x72, 0x68, 0x5e, 0x54, 0x4a, 0x40, 0x36, 0x4f, 0x4f, 0x4f, 0x6a, 0xe0, 0xd6, 0xcc,
+		0xc2, 0x63, 0x59, 0x4f, 0xcf, 0xcf, 0xcf, 0xc9, 0x56, 0x56, 0x56, 0x7e, 0x7e, 0x7e, 0x7e, 0x7e,
+		0x7e, 0x74, 0x6a, 0x60, 0x56, 0x56, 0x56, 0x56, 0x56, 0x7e, 0x7e, 0x7e, 0x7e, 0x7e, 0x7e, 0x74,
+		0x6a, 0x60, 0x56, 0x56, 0x56, 0x7e, 0x7e, 0x74, 0x6a, 0x60, 0x56, 0x56, 0x5a, 0x52
 	},
 	{
-	/* Draw Bridge data */
-	0x76,0x76,0x6c,0x62,0x69,0x5f,0x55,0x50,0x58,0x58,0x58,0x76,0x76,0x76,0x6c,0x62,
-	0x58,0x58,0x58,0x4d,0x43,0x76,0x76,0x76,0x76,0x76,0x6c,0x62,0x58,0x58,0x58,0x58,
-	0x58,0x78,0x78,0x78,0x78,0x78,0x78,0x78,0x78,0x78,0xf8,0xee,0xe4,0x5a,0x50,0xc6,
-	0x76,0x76,0x76,0xbb,0xbb,0x76,0x76,0x76,0x6c,0x62,0xd8,0xd8,0xd8,0xe4,0xf6,0xec,
-	0xe2,0xd8,0x76,0x76,0x76,0x76,0x6c,0x62,0x58,0x58,0x58,0x58,0x58,0x7c
+		/* Draw Bridge data */
+		0x76, 0x76, 0x6c, 0x62, 0x69, 0x5f, 0x55, 0x50, 0x58, 0x58, 0x58, 0x76, 0x76, 0x76, 0x6c, 0x62,
+		0x58, 0x58, 0x58, 0x4d, 0x43, 0x76, 0x76, 0x76, 0x76, 0x76, 0x6c, 0x62, 0x58, 0x58, 0x58, 0x58,
+		0x58, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0xf8, 0xee, 0xe4, 0x5a, 0x50, 0xc6,
+		0x76, 0x76, 0x76, 0xbb, 0xbb, 0x76, 0x76, 0x76, 0x6c, 0x62, 0xd8, 0xd8, 0xd8, 0xe4, 0xf6, 0xec,
+		0xe2, 0xd8, 0x76, 0x76, 0x76, 0x76, 0x6c, 0x62, 0x58, 0x58, 0x58, 0x58, 0x58, 0x7c
 	},
 	{
-	/* High Jump data */
-	0xe7,0xdd,0xd3,0x77,0x77,0x77,0x77,0x6d,0x63,0x59,0x4f,0x4f,0x4f,0x7a,0x7a,0x7a,
-	0x7a,0x7a,0x70,0x66,0x5c,0x52,0x52,0x55,0x59,0x4f,0x4f,0x77,0x77,0x77,0x77,0x6d,
-	0x63,0x59,0x4f,0x4f,0xcf,0xe7,0xdd,0xd3,0xce,0x77,0x77,0x77,0x77,0x6d,0x63,0x59,
-	0x4f,0x4f,0x4f,0x7c,0x41,0x41,0x41,0x7c
+		/* High Jump data */
+		0xe7, 0xdd, 0xd3, 0x77, 0x77, 0x77, 0x77, 0x6d, 0x63, 0x59, 0x4f, 0x4f, 0x4f, 0x7a, 0x7a, 0x7a,
+		0x7a, 0x7a, 0x70, 0x66, 0x5c, 0x52, 0x52, 0x55, 0x59, 0x4f, 0x4f, 0x77, 0x77, 0x77, 0x77, 0x6d,
+		0x63, 0x59, 0x4f, 0x4f, 0xcf, 0xe7, 0xdd, 0xd3, 0xce, 0x77, 0x77, 0x77, 0x77, 0x6d, 0x63, 0x59,
+		0x4f, 0x4f, 0x4f, 0x7c, 0x41, 0x41, 0x41, 0x7c
 	},
 	{
-	/* Roller Coaster data */
-	0x66,0x5c,0x52,0x48,0x3e,0x34,0x2a,0x29,0x6a,0x60,0x56,0x56,0x56,0x40,0x36,0x7e,
-	0x7e,0x7e,0x7e,0x7e,0x7e,0x74,0x6a,0x60,0x56,0x56,0x54,0x4a,0x7e,0x7e,0x7e,0x7e,
-	0x7e,0x7e,0x7e,0x74,0x6a,0x60,0x56,0x56,0x56,0x56,0x56,0x7e,0x7e,0x7e,0x7e,0x7e,
-	0x7e,0x74,0x6a,0x60,0x56,0x56,0x56,0x56,0x56,0x7e,0x7e,0x7e,0x7e,0x7e,0x7e,0x74,
-	0x6a,0x60,0x56,0x56,0x56,0x7e,0x7e,0x74,0x6a,0x60,0x56,0x56,0x5a,0x52
+		/* Roller Coaster data */
+		0x66, 0x5c, 0x52, 0x48, 0x3e, 0x34, 0x2a, 0x29, 0x6a, 0x60, 0x56, 0x56, 0x56, 0x40, 0x36, 0x7e,
+		0x7e, 0x7e, 0x7e, 0x7e, 0x7e, 0x74, 0x6a, 0x60, 0x56, 0x56, 0x54, 0x4a, 0x7e, 0x7e, 0x7e, 0x7e,
+		0x7e, 0x7e, 0x7e, 0x74, 0x6a, 0x60, 0x56, 0x56, 0x56, 0x56, 0x56, 0x7e, 0x7e, 0x7e, 0x7e, 0x7e,
+		0x7e, 0x74, 0x6a, 0x60, 0x56, 0x56, 0x56, 0x56, 0x56, 0x7e, 0x7e, 0x7e, 0x7e, 0x7e, 0x7e, 0x74,
+		0x6a, 0x60, 0x56, 0x56, 0x56, 0x7e, 0x7e, 0x74, 0x6a, 0x60, 0x56, 0x56, 0x5a, 0x52
 	}
 };
 
@@ -156,42 +156,42 @@ extern IDirectSoundBuffer8 *HitCarSoundBuffer;
 
 static unsigned char opponent_attributes[NUM_OPPONENTS] =
 {
-// Hot Rod
-PUSH_PLAYER|OBSTRUCTS_PLAYER,
-// Whizz Kid
-PUSH_PLAYER,
-// Bad Guy
-UNUSED6|PUSH_PLAYER|OBSTRUCTS_PLAYER,
-// The Dodger
-PUSH_PLAYER,
-// Big Ed
-PUSH_PLAYER|UNUSED4|DRIVES_NEAR_EDGE|WHEELIE|OBSTRUCTS_PLAYER,
-// Max Boost
-WHEELIE,
-// Dare Devil
-PUSH_PLAYER|UNUSED4,
-// High Flyer
-UNUSED4|WHEELIE,
-// Bully Boy
-UNUSED6|DRIVES_NEAR_EDGE|OBSTRUCTS_PLAYER,
-// Jumping Jack
-UNUSED4,
-// Road Hog
-DRIVES_NEAR_EDGE
+	// Hot Rod
+	PUSH_PLAYER | OBSTRUCTS_PLAYER,
+	// Whizz Kid
+	PUSH_PLAYER,
+	// Bad Guy
+	UNUSED6 | PUSH_PLAYER | OBSTRUCTS_PLAYER,
+	// The Dodger
+	PUSH_PLAYER,
+	// Big Ed
+	PUSH_PLAYER | UNUSED4 | DRIVES_NEAR_EDGE | WHEELIE | OBSTRUCTS_PLAYER,
+	// Max Boost
+	WHEELIE,
+	// Dare Devil
+	PUSH_PLAYER | UNUSED4,
+	// High Flyer
+	UNUSED4 | WHEELIE,
+	// Bully Boy
+	UNUSED6 | DRIVES_NEAR_EDGE | OBSTRUCTS_PLAYER,
+	// Jumping Jack
+	UNUSED4,
+	// Road Hog
+	DRIVES_NEAR_EDGE
 };
 
 // Values for each track
-static unsigned char opp_track_speed_values[] =	//DAT.1fe2c
+static unsigned char opp_track_speed_values [] =	//DAT.1fe2c
 {
 	// Standard league
-	0x07,0x07,0x07,0x07,0x07,0x07,0x07,0x07,
-	0x41,0x3a,0x3e,0x41,0x48,0x51,0x48,0x4f,
+	0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07,
+	0x41, 0x3a, 0x3e, 0x41, 0x48, 0x51, 0x48, 0x4f,
 	//0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,	// used when creating opponents.speed.values
 	//0x48,0x41,0x45,0x48,0x4f,0x58,0x4f,0x56,	// used when creating opponents.speed.values
 
 	// Super league
-	0x07,0x03,0x03,0x03,0x03,0x03,0x07,0x03,
-	0x66,0x57,0x57,0x59,0x59,0x69,0x62,0x64
+	0x07, 0x03, 0x03, 0x03, 0x03, 0x03, 0x07, 0x03,
+	0x66, 0x57, 0x57, 0x59, 0x59, 0x69, 0x62, 0x64
 	//0x07,0x03,0x03,0x03,0x03,0x01,0x03,0x03,	// used when creating opponents.speed.values
 	//0x61,0x55,0x53,0x56,0x58,0x5b,0x5a,0x62	// used when creating opponents.speed.values
 };
@@ -244,34 +244,34 @@ static bool opponents_required_z_speed_reached;
 /*	===================== */
 /*	Function declarations */
 /*	===================== */
-static void ResetOpponent (void);
-static void CalculateOpponentsRoadWheelPositions( void );
-static void GetSurfaceCoords( long piece, long segment );
-static long CalcSurfacePosition( long *next_segment, long distance, long z_shift );
-static void CalculateOpponentsRoadWheelHeight( long sx, long sz, long *y_out );
-static void OpponentMovement( void );
+static void ResetOpponent(void);
+static void CalculateOpponentsRoadWheelPositions(void);
+static void GetSurfaceCoords(long piece, long segment);
+static long CalcSurfacePosition(long *next_segment, long distance, long z_shift);
+static void CalculateOpponentsRoadWheelHeight(long sx, long sz, long *y_out);
+static void OpponentMovement(void);
 
-static void UpdateOpponentsActualWheelHeights( void );
-static void CalculateWheelDifference( long road_height,
-									  long actual_height,
-									  long height_adjust,
-									  long *old_difference_in_out,
-									  long *new_difference_out,
-									  long *touching_road);
-static long LimitOpponentWheels( long max_difference, long wheel1, long wheel2 );
-static void AverageWheelYSpeeds( long wheel1, long wheel2 );
+static void UpdateOpponentsActualWheelHeights(void);
+static void CalculateWheelDifference(long road_height,
+	long actual_height,
+	long height_adjust,
+	long *old_difference_in_out,
+	long *new_difference_out,
+	long *touching_road);
+static long LimitOpponentWheels(long max_difference, long wheel1, long wheel2);
+static void AverageWheelYSpeeds(long wheel1, long wheel2);
 
-static void RandomizeOpponentsSteering( void );
+static void RandomizeOpponentsSteering(void);
 
-static void GetOpponentsEngineAcceleration( void );
-static void AdjustOpponentsEngineAcceleration( void );
-static void UpdateOpponentsZSpeed( void );
+static void GetOpponentsEngineAcceleration(void);
+static void AdjustOpponentsEngineAcceleration(void);
+static void UpdateOpponentsZSpeed(void);
 
-static void CalculateDistancesBetweenPlayers( void );
+static void CalculateDistancesBetweenPlayers(void);
 
-static void OpponentPlayerInteraction( void );
-static void MoveOpponentToOneSide( void );
-static void OpponentPushPlayer( void );
+static void OpponentPlayerInteraction(void);
+static void MoveOpponentToOneSide(void);
+static void OpponentPushPlayer(void);
 
 
 /*	======================================================================================= */
@@ -280,10 +280,10 @@ static void OpponentPushPlayer( void );
 /*	Description:	Reset all opponent behaviour variables to their initial state			*/
 /*	======================================================================================= */
 
-static void ResetOpponent (void)
-	{
+static void ResetOpponent(void)
+{
 	opponentsID = rand() % NUM_OPPONENTS;
-//	opponentsID = 9;	// Jumping Jack
+	//	opponentsID = 9;	// Jumping Jack
 
 	opp_old_rear_left_difference = 0;
 	opp_old_rear_right_difference = 0;
@@ -300,7 +300,7 @@ static void ResetOpponent (void)
 	player_close_to_opponent = FALSE;
 	opponent_behind_player = FALSE;
 	return;
-	}
+}
 
 /*	======================================================================================= */
 /*	Function:		OpponentBehaviour														*/
@@ -320,27 +320,27 @@ extern long PlayersStartPiece;
 // current surface co-ords
 static long sx1, sy1, sz1, sx2, sy2, sz2, sx3, sy3, sz3, sx4, sy4, sz4;
 
-void OpponentBehaviour (long *x,
-						long *y,
-						long *z,
-						float *x_angle,
-						float *y_angle,
-						float *z_angle,
-						bool bOpponentPaused)
+void OpponentBehaviour(long *x,
+	long *y,
+	long *z,
+	float *x_angle,
+	float *y_angle,
+	float *z_angle,
+	bool bOpponentPaused)
 {
 	long opponent_x, opponent_y, opponent_z;
 	float opponent_x_angle = 0.0f, opponent_y_angle = 0.0f, opponent_z_angle = 0.0f;
 
 	// reset opponent
 	if (bNewGame)
-		{
+	{
 		ResetOpponent();
 
 		opponents_current_piece = PlayersStartPiece;
 		opponents_distance_into_section = 0x400;	// half way into section
 		opponents_road_x_position = 0x4c;
-//temp		opponents_road_x_position = 0x1c;
-//temp		opponents_road_x_position = 0xe4;
+		//temp		opponents_road_x_position = 0x1c;
+		//temp		opponents_road_x_position = 0xe4;
 
 		// initialise.opponent.data
 		CalculateOpponentsRoadWheelPositions();
@@ -354,13 +354,13 @@ void OpponentBehaviour (long *x,
 		// end initialise.opponent.data
 
 		// Set opponent_max_speed
-		long s = (long)rand() & (long)opp_track_speed_values[TrackID];
-		s += (long)opp_track_speed_values[TrackID+8];
+		long s = (long) rand() & (long) opp_track_speed_values[TrackID];
+		s += (long) opp_track_speed_values[TrackID + 8];
 		opponents_max_speed = s;
-//temp		opponents_max_speed = 10;
+		//temp		opponents_max_speed = 10;
 
 		bNewGame = FALSE;
-		}
+	}
 
 
 	CalculatePlayersRoadPosition();
@@ -386,7 +386,7 @@ void OpponentBehaviour (long *x,
 	opponent_x <<= LOG_PRECISION;
 
 #ifdef USE_OPP_CENTRE_POS
-//	VALUE1 = (bTestKey ? 1 : 0);
+	//	VALUE1 = (bTestKey ? 1 : 0);
 	VALUE2 = VALUE3 = 0;
 	if (bTestKey)
 	{
@@ -410,19 +410,19 @@ void OpponentBehaviour (long *x,
 #else
 	long road_y = (opp_rear_left_road_pos.y + opp_rear_right_road_pos.y) / 2;
 	road_y = (road_y + opp_front_road_pos_y) / 2;
-	#ifdef USE_ROAD_Y
+#ifdef USE_ROAD_Y
 	long rear_y = (opp_rear_left_road_pos.y + opp_rear_right_road_pos.y) / 2;
 	opponent_y = (rear_y + opp_front_road_pos_y) / 2;
-	#else
+#else
 	long rear_y = (opp_actual_height[REAR_LEFT] + opp_actual_height[REAR_RIGHT]) / 2;
 	opponent_y = (rear_y + opp_actual_height[FRONT]) / 2;
-	#endif
+#endif
 	if (opponent_y < road_y) opponent_y = road_y;
 #endif
 
 	// Raise the opponent slightly (to stop them sinking into road due to inaccurate heights)
 	opponent_y += 20;
-	opponent_y <<= (LOG_PRECISION-3);
+	opponent_y <<= (LOG_PRECISION - 3);
 
 	/*
 	 * Calculate opponent's z position
@@ -446,39 +446,39 @@ void OpponentBehaviour (long *x,
 #ifdef USE_ROAD_Y
 	double yd = (double)(rear_y - opp_front_road_pos_y) / 2;	// Note y is halved because of unit differences between y and x,z
 #else
-	#ifdef NEW_OPP_METHOD
-	double yd = (double)(rear_y - vis_front_y) / 2;	// Note y is halved because of unit differences between y and x,z
-	#else
+#ifdef NEW_OPP_METHOD
+	double yd = (double) (rear_y - vis_front_y) / 2;	// Note y is halved because of unit differences between y and x,z
+#else
 	double yd = (double)(rear_y - opp_actual_height[FRONT]) / 2;	// Note y is halved because of unit differences between y and x,z
-	#endif
+#endif
 #endif
 	long rear_x = (opp_rear_left_road_pos.x + opp_rear_right_road_pos.x) / 2;
 	long rear_z = (opp_rear_left_road_pos.z + opp_rear_right_road_pos.z) / 2;
 	long front_x = (opp_front_left_road_pos.x + opp_front_right_road_pos.x) / 2;
 	long front_z = (opp_front_left_road_pos.z + opp_front_right_road_pos.z) / 2;
-	double xd = (double)(rear_x - front_x);
-	double zd = (double)(rear_z - front_z);
+	double xd = (double) (rear_x - front_x);
+	double zd = (double) (rear_z - front_z);
 	double carzd = sqrt((xd*xd) + (zd*zd));
-	opponent_x_angle = (float)atan2(yd, carzd);
+	opponent_x_angle = (float) atan2(yd, carzd);
 
 	// Along car's y axis, only use x and z components
-	xd = (double)(opp_rear_left_road_pos.x - opp_rear_right_road_pos.x);
-	zd = (double)(opp_rear_left_road_pos.z - opp_rear_right_road_pos.z);
-//	opponent_y_angle = (float)atan2(xd, zd) + D3DX_PI/2;
-	opponent_y_angle = (float)atan2(zd, -xd);
+	xd = (double) (opp_rear_left_road_pos.x - opp_rear_right_road_pos.x);
+	zd = (double) (opp_rear_left_road_pos.z - opp_rear_right_road_pos.z);
+	//	opponent_y_angle = (float)atan2(xd, zd) + D3DX_PI/2;
+	opponent_y_angle = (float) atan2(zd, -xd);
 
 	// Along car's z axis, only use x and y components
 #ifdef USE_ROAD_Y
 	yd = (double)(opp_rear_left_road_pos.y - opp_rear_right_road_pos.y) / 2;	// Note y is halved because of unit differences between y and x,z
 #else
-	#ifdef NEW_OPP_METHOD
-	yd = (double)(vis_rear_left_y - vis_rear_right_y) / 2;	// Note y is halved because of unit differences between y and x,z
-	#else
+#ifdef NEW_OPP_METHOD
+	yd = (double) (vis_rear_left_y - vis_rear_right_y) / 2;	// Note y is halved because of unit differences between y and x,z
+#else
 	yd = (double)(opp_actual_height[REAR_LEFT] - opp_actual_height[REAR_RIGHT]) / 2;	// Note y is halved because of unit differences between y and x,z
-	#endif
+#endif
 #endif
 	double carxd = sqrt((xd*xd) + (zd*zd));
-	opponent_z_angle = (float)atan2(-yd, carxd);
+	opponent_z_angle = (float) atan2(-yd, carxd);
 
 	// output opponent values for use by functions that draw the world
 	*x = opponent_x;
@@ -498,25 +498,25 @@ void OpponentBehaviour (long *x,
 // current surface co-ords
 //static long sx1, sy1, sz1, sx2, sy2, sz2, sx3, sy3, sz3, sx4, sy4, sz4;
 
-static long B1bbbe[3] = {0,0,0};	// set by randomize.opponents.steering
-									// third value is opponents.random.steering.count
+static long B1bbbe[3] = { 0, 0, 0 };	// set by randomize.opponents.steering
+// third value is opponents.random.steering.count
 
 static long opponents_x_spans[NUM_X_SPANS] =
-{27,27,27,27,27,26,26,26,25,25,25,24,23,23,22,21,20,19,18,17,15,14,11,9,7,7,7,7,7,7,7,7};
+{ 27, 27, 27, 27, 27, 26, 26, 26, 25, 25, 25, 24, 23, 23, 22, 21, 20, 19, 18, 17, 15, 14, 11, 9, 7, 7, 7, 7, 7, 7, 7, 7 };
 
 #ifdef OPPONENT_SHADOW
-extern void RemoveShadowTriangles( void );
-extern void StoreShadowTriangle( D3DXVECTOR3 v1, D3DXVECTOR3 v2, D3DXVECTOR3 v3, long other_colour );
+extern void RemoveShadowTriangles(void);
+extern void StoreShadowTriangle(D3DXVECTOR3 v1, D3DXVECTOR3 v2, D3DXVECTOR3 v3, long other_colour);
 #endif
 
 
 // All three road heights tested against Amiga
-static void CalculateOpponentsRoadWheelPositions( void )
+static void CalculateOpponentsRoadWheelPositions(void)
 {
-long distance, segment, surface_position;
-long piece = opponents_current_piece, next_segment;
-long left_side_x, left_side_z, right_side_x, right_side_z;
-bool draw_shadow = TRUE;
+	long distance, segment, surface_position;
+	long piece = opponents_current_piece, next_segment;
+	long left_side_x, left_side_z, right_side_x, right_side_z;
+	bool draw_shadow = TRUE;
 
 
 	/*
@@ -557,37 +557,37 @@ bool draw_shadow = TRUE;
 	surface_position = CalcSurfacePosition(&next_segment, distance, B1bbbe[0]);
 	if (!next_segment)
 	{
-		left_side_x = sx2 + ((surface_position * (sx1-sx2)) >> 8);
-		left_side_z = sz2 + ((surface_position * (sz1-sz2)) >> 8);
+		left_side_x = sx2 + ((surface_position * (sx1 - sx2)) >> 8);
+		left_side_z = sz2 + ((surface_position * (sz1 - sz2)) >> 8);
 	}
 	else
 	{
 		// Use other end's value as base
 		// (Amiga StuntCarRacer does this, but not correct as should really use next segment's values)
-		left_side_x = sx1 + ((surface_position * (sx1-sx2)) >> 8);
-		left_side_z = sz1 + ((surface_position * (sz1-sz2)) >> 8);
+		left_side_x = sx1 + ((surface_position * (sx1 - sx2)) >> 8);
+		left_side_z = sz1 + ((surface_position * (sz1 - sz2)) >> 8);
 	}
 
 	// Calculate segment right side x,z at opponents.distance.into.section.minus64
 	surface_position = CalcSurfacePosition(&next_segment, distance, B1bbbe[2]);
 	if (!next_segment)
 	{
-		right_side_x = sx3 + ((surface_position * (sx4-sx3)) >> 8);
-		right_side_z = sz3 + ((surface_position * (sz4-sz3)) >> 8);
+		right_side_x = sx3 + ((surface_position * (sx4 - sx3)) >> 8);
+		right_side_z = sz3 + ((surface_position * (sz4 - sz3)) >> 8);
 	}
 	else
 	{
 		// Use other end's value as base
 		// (Amiga StuntCarRacer does this, but not correct as should really use next segment's values)
-		right_side_x = sx4 + ((surface_position * (sx4-sx3)) >> 8);
-		right_side_z = sz4 + ((surface_position * (sz4-sz3)) >> 8);
+		right_side_x = sx4 + ((surface_position * (sx4 - sx3)) >> 8);
+		right_side_z = sz4 + ((surface_position * (sz4 - sz3)) >> 8);
 	}
 
 	next_segment = FALSE;
 	long i = abs(opp_actual_height[REAR_LEFT] - opp_actual_height[REAR_RIGHT]) >> 4;
 	// Get half the x distance that the opponent's rear wheels span
 	if (i < 0) i = 0;
-	if (i >= NUM_X_SPANS) i = NUM_X_SPANS-1;
+	if (i >= NUM_X_SPANS) i = NUM_X_SPANS - 1;
 	long opponents_x_span = opponents_x_spans[i];
 
 	// For calculating the opponent's shadow co-ordinates, the original StuntCarRacer spans are slightly
@@ -595,11 +595,11 @@ bool draw_shadow = TRUE;
 	long xd = right_side_x - left_side_x;
 	long yd = (sy3 - sy2) / LOCAL_Y_FACTOR;
 	long zd = right_side_z - left_side_z;
-	long base_width = (long)(sqrt((double)((xd*xd) + (zd*zd))));
-	long slope_width = (long)(sqrt((double)((base_width*base_width) + (yd*yd))));
+	long base_width = (long) (sqrt((double) ((xd*xd) + (zd*zd))));
+	long slope_width = (long) (sqrt((double) ((base_width*base_width) + (yd*yd))));
 	long opponents_shadow_x_span = (opponents_x_span * base_width) / slope_width;
-//	if (!bTestKey)
-//		opponents_shadow_x_span = opponents_x_span;
+	//	if (!bTestKey)
+	//		opponents_shadow_x_span = opponents_x_span;
 
 	long sx, sz;
 	sz = distance & 0xff;	// z position of rear wheels
@@ -635,9 +635,9 @@ bool draw_shadow = TRUE;
 
 	long piece_x, piece_y, piece_z;
 	// Calculate position of piece's bottom front left corner, within world
-	piece_x = Track[piece].x << (LOG_CUBE_SIZE-LOG_PRECISION);
-	piece_y = Track[piece].y << (LOG_CUBE_SIZE-LOG_PRECISION);
-	piece_z = Track[piece].z << (LOG_CUBE_SIZE-LOG_PRECISION);
+	piece_x = Track[piece].x << (LOG_CUBE_SIZE - LOG_PRECISION);
+	piece_y = Track[piece].y << (LOG_CUBE_SIZE - LOG_PRECISION);
+	piece_z = Track[piece].z << (LOG_CUBE_SIZE - LOG_PRECISION);
 	// Position rear road co-ordinates within world
 	opp_rear_left_road_pos.x += piece_x;
 	opp_rear_right_road_pos.x += piece_x;
@@ -650,7 +650,7 @@ bool draw_shadow = TRUE;
 	opp_shadow_rear_right.z += piece_z;
 
 
-//****************
+	//****************
 
 
 #ifdef USE_OPP_CENTRE_POS
@@ -681,7 +681,7 @@ bool draw_shadow = TRUE;
 #endif
 
 
-//****************
+	//****************
 
 
 	/*
@@ -739,7 +739,7 @@ bool draw_shadow = TRUE;
 	GetRecordedAmigaWord(&ty2);
 	GetRecordedAmigaWord(&ty3);
 	GetRecordedAmigaWord(&ty4);
-#endif
+	#endif
 	*/
 
 	sz = distance & 0xff;	// z position of front wheel
@@ -808,11 +808,11 @@ bool draw_shadow = TRUE;
 	// already /2 because are in Amiga format (i.e. not * PC_FACTOR).
 	// Also add 7 to y so that shadow is slightly above road and isn't clipped as much
 	D3DXVECTOR3 v1, v2, v3, v4;
-	v2 = D3DXVECTOR3( (float)opp_shadow_rear_left.x, 7 + (float)opp_shadow_rear_left.y/2, (float)opp_shadow_rear_left.z );
-	v3 = D3DXVECTOR3( (float)opp_shadow_rear_right.x, 7 + (float)opp_shadow_rear_right.y/2, (float)opp_shadow_rear_right.z );
+	v2 = D3DXVECTOR3((float) opp_shadow_rear_left.x, 7 + (float) opp_shadow_rear_left.y / 2, (float) opp_shadow_rear_left.z);
+	v3 = D3DXVECTOR3((float) opp_shadow_rear_right.x, 7 + (float) opp_shadow_rear_right.y / 2, (float) opp_shadow_rear_right.z);
 
-	v1 = D3DXVECTOR3( (float)opp_shadow_front_left.x, 7 + (float)opp_shadow_front_left.y/2, (float)opp_shadow_front_left.z );
-	v4 = D3DXVECTOR3( (float)opp_shadow_front_right.x, 7 + (float)opp_shadow_front_right.y/2, (float)opp_shadow_front_right.z );
+	v1 = D3DXVECTOR3((float) opp_shadow_front_left.x, 7 + (float) opp_shadow_front_left.y / 2, (float) opp_shadow_front_left.z);
+	v4 = D3DXVECTOR3((float) opp_shadow_front_right.x, 7 + (float) opp_shadow_front_right.y / 2, (float) opp_shadow_front_right.z);
 
 	RemoveShadowTriangles();
 	if (draw_shadow)
@@ -822,14 +822,14 @@ bool draw_shadow = TRUE;
 	}
 #endif
 
-//	VALUE1 = opp_rear_left_road_pos.y;
-//	VALUE2 = opp_front_road_pos_y;
-//	VALUE3 = opp_rear_right_road_pos.y;
+	//	VALUE1 = opp_rear_left_road_pos.y;
+	//	VALUE2 = opp_front_road_pos_y;
+	//	VALUE3 = opp_rear_right_road_pos.y;
 	return;
 }
 
 
-static void GetSurfaceCoords( long piece, long segment )
+static void GetSurfaceCoords(long piece, long segment)
 {
 	if ((segment < 0) || (segment >= Track[piece].numSegments))
 	{
@@ -839,29 +839,29 @@ static void GetSurfaceCoords( long piece, long segment )
 #endif
 	}
 
-	sx2 = Track[piece].coords[(segment*4)].x;
-	sy2 = Track[piece].coords[(segment*4)].y;
-	sz2 = Track[piece].coords[(segment*4)].z;
+	sx2 = Track[piece].coords[(segment * 4)].x;
+	sy2 = Track[piece].coords[(segment * 4)].y;
+	sz2 = Track[piece].coords[(segment * 4)].z;
 
-	sx3 = Track[piece].coords[(segment*4)+1].x;
-	sy3 = Track[piece].coords[(segment*4)+1].y;
-	sz3 = Track[piece].coords[(segment*4)+1].z;
+	sx3 = Track[piece].coords[(segment * 4) + 1].x;
+	sy3 = Track[piece].coords[(segment * 4) + 1].y;
+	sz3 = Track[piece].coords[(segment * 4) + 1].z;
 
 	segment++;
-	sx1 = Track[piece].coords[(segment*4)].x;
-	sy1 = Track[piece].coords[(segment*4)].y;
-	sz1 = Track[piece].coords[(segment*4)].z;
+	sx1 = Track[piece].coords[(segment * 4)].x;
+	sy1 = Track[piece].coords[(segment * 4)].y;
+	sz1 = Track[piece].coords[(segment * 4)].z;
 
-	sx4 = Track[piece].coords[(segment*4)+1].x;
-	sy4 = Track[piece].coords[(segment*4)+1].y;
-	sz4 = Track[piece].coords[(segment*4)+1].z;
+	sx4 = Track[piece].coords[(segment * 4) + 1].x;
+	sy4 = Track[piece].coords[(segment * 4) + 1].y;
+	sz4 = Track[piece].coords[(segment * 4) + 1].z;
 	return;
 }
 
 
-static long CalcSurfacePosition( long *next_segment, long distance, long z_shift )
+static long CalcSurfacePosition(long *next_segment, long distance, long z_shift)
 {
-long surface_position = distance & 0xff;
+	long surface_position = distance & 0xff;
 
 	*next_segment = FALSE;
 	surface_position += z_shift;
@@ -875,9 +875,9 @@ long surface_position = distance & 0xff;
 }
 
 
-static void CalculateOpponentsRoadWheelHeight( long sx, long sz, long *y_out )
+static void CalculateOpponentsRoadWheelHeight(long sx, long sz, long *y_out)
 {
-long sya, syb, y;
+	long sya, syb, y;
 
 	// calculate height of surface at x,z position using linear interpolation
 
@@ -888,11 +888,11 @@ long sya, syb, y;
 	//			  (sx4, sy4, sz4)
 
 	// first do x interpolation
-	sya = sy1 + ((sx * (sy4-sy1)) >> 8);
-	syb = sy2 + ((sx * (sy3-sy2)) >> 8);
+	sya = sy1 + ((sx * (sy4 - sy1)) >> 8);
+	syb = sy2 + ((sx * (sy3 - sy2)) >> 8);
 
 	// now do z interpolation
-	y = (syb << 8) + (sz * (sya-syb));
+	y = (syb << 8) + (sz * (sya - syb));
 
 	*y_out = y >> 9;
 	return;
@@ -909,9 +909,9 @@ extern bool drop_start_done;
 
 
 // Tested against Amiga
-static void OpponentMovement( void )
+static void OpponentMovement(void)
 {
-static long byte_count = 0;
+	static long byte_count = 0;
 
 	if (!drop_start_done)
 		return;
@@ -966,7 +966,7 @@ static long byte_count = 0;
 		byte_count &= 0xff;
 	}
 	opponents_distance_into_section += value;
-	
+
 
 	if (opponents_distance_into_section >= (Track[opponents_current_piece].numSegments * 256))
 	{
@@ -993,9 +993,9 @@ static long byte_count = 0;
 /*	======================================================================================= */
 
 // Tested against Amiga
-static void UpdateOpponentsActualWheelHeights( void )
+static void UpdateOpponentsActualWheelHeights(void)
 {
-long height_adjust, touching_road, total_diff, i, acceleration, speed;
+	long height_adjust, touching_road, total_diff, i, acceleration, speed;
 
 	opp_smallest_difference = -32768;
 
@@ -1028,25 +1028,25 @@ long height_adjust, touching_road, total_diff, i, acceleration, speed;
 	touching_road = 0;
 
 	CalculateWheelDifference(opp_rear_left_road_pos.y,
-							 opp_actual_height[REAR_LEFT],
-							 height_adjust,
-							 &opp_old_rear_left_difference,
-							 &opp_new_rear_left_difference,
-							 &touching_road);
+		opp_actual_height[REAR_LEFT],
+		height_adjust,
+		&opp_old_rear_left_difference,
+		&opp_new_rear_left_difference,
+		&touching_road);
 
 	CalculateWheelDifference(opp_rear_right_road_pos.y,
-							 opp_actual_height[REAR_RIGHT],
-							 height_adjust,
-							 &opp_old_rear_right_difference,
-							 &opp_new_rear_right_difference,
-							 &touching_road);
+		opp_actual_height[REAR_RIGHT],
+		height_adjust,
+		&opp_old_rear_right_difference,
+		&opp_new_rear_right_difference,
+		&touching_road);
 
 	CalculateWheelDifference(opp_front_road_pos_y,
-							 opp_actual_height[FRONT],
-							 height_adjust,
-							 &opp_old_front_difference,
-							 &opp_new_front_difference,
-							 &touching_road);
+		opp_actual_height[FRONT],
+		height_adjust,
+		&opp_old_front_difference,
+		&opp_new_front_difference,
+		&touching_road);
 
 	if (touching_road)
 		opp_touching_road = TRUE;
@@ -1088,15 +1088,15 @@ long height_adjust, touching_road, total_diff, i, acceleration, speed;
 
 	// Randomly make opponent do a wheelie (if they have that attribute)
 	if (opponent_attributes[opponentsID] & WHEELIE)
-		{
+	{
 		i = opp_y_speed[FRONT] | opp_y_acceleration[FRONT];
 		if ((i & 0xfffc) == 0)		// If front of car isn't moving much vertically
-			{
+		{
 			i = rand() & 0xf;
 			if (i == 0)
 				opp_y_speed[FRONT] = 160;	// Make opponent do a wheelie
-			}
 		}
+	}
 
 
 	// Update rear left wheel y speed and height
@@ -1145,15 +1145,15 @@ long height_adjust, touching_road, total_diff, i, acceleration, speed;
 }
 
 
-static void CalculateWheelDifference( long road_height,
-									  long actual_height,
-									  long height_adjust,
-									  long *old_difference_in_out,
-									  long *new_difference_out,
-									  long *touching_road)
+static void CalculateWheelDifference(long road_height,
+	long actual_height,
+	long height_adjust,
+	long *old_difference_in_out,
+	long *new_difference_out,
+	long *touching_road)
 {
-long new_difference;
-long amount_below_road;
+	long new_difference;
+	long amount_below_road;
 
 	new_difference = road_height - actual_height;
 	if (new_difference > opp_smallest_difference)
@@ -1182,9 +1182,9 @@ long amount_below_road;
 
 // Adjusts opponent wheel heights and y speeds to limit car's x and z angle
 // Especially important when in the air on more extreme tracks (e.g. Roller Coaster)
-static long LimitOpponentWheels( long max_difference, long wheel1, long wheel2 )
+static long LimitOpponentWheels(long max_difference, long wheel1, long wheel2)
 {
-long diff, drop, speed_diff;
+	long diff, drop, speed_diff;
 
 	diff = opp_actual_height[wheel1] - opp_actual_height[wheel2];
 
@@ -1224,7 +1224,7 @@ long diff, drop, speed_diff;
 	speed_diff = opp_y_speed[wheel1] - opp_y_speed[FRONT];
 	if (speed_diff < 16)
 	{
-		static long	y_speed_adjustments[] = {4,4,-4};
+		static long	y_speed_adjustments [] = { 4, 4, -4 };
 
 		for (long i = 0; i < NUM_OPP_WHEEL_POSITIONS; i++)
 		{
@@ -1236,7 +1236,7 @@ long diff, drop, speed_diff;
 }
 
 
-static void AverageWheelYSpeeds( long wheel1, long wheel2 )
+static void AverageWheelYSpeeds(long wheel1, long wheel2)
 {
 	long average = (opp_y_speed[wheel1] + opp_y_speed[wheel2]) >> 1;
 	opp_y_speed[wheel1] = average;
@@ -1254,16 +1254,16 @@ static long B1bb9d = 0;
 static long B1bbc2 = 0;
 static long B1bbbd = 0;
 
-static long TAB5be34[] =
-{0x20,0x50,0x60,0x70,0x70,0x60,0x50,0x20,
--0x20,-0x50,-0x60,-0x70,-0x70,-0x60,-0x50,-0x20};
+static long TAB5be34 [] =
+{ 0x20, 0x50, 0x60, 0x70, 0x70, 0x60, 0x50, 0x20,
+-0x20, -0x50, -0x60, -0x70, -0x70, -0x60, -0x50, -0x20 };
 
 
 // Tested against Amiga
-static void RandomizeOpponentsSteering( void )
+static void RandomizeOpponentsSteering(void)
 {
-// TO DO: Tidy up, rename variables, remove gotos
-long d0, d1, d2;
+	// TO DO: Tidy up, rename variables, remove gotos
+	long d0, d1, d2;
 
 #ifdef TEST_AMIGA_ROS
 	if (GetRecordedAmigaWord(&opponentsID))
@@ -1298,7 +1298,7 @@ long d0, d1, d2;
 #ifdef TEST_AMIGA_ROS
 	if (!fourteen_frames_elapsed)
 #endif
-	B1bbbe[2] -= 1;
+		B1bbbe[2] -= 1;
 
 	d0 += B1bbc2;
 	d0 &= 0xf;
@@ -1376,9 +1376,9 @@ ros2:
 /*	======================================================================================= */
 
 // Tested against Amiga
-static void GetOpponentsEngineAcceleration( void )
+static void GetOpponentsEngineAcceleration(void)
 {
-long power = opp_engine_power;
+	long power = opp_engine_power;
 
 #ifdef TEST_AMIGA_GOEA
 	if (GetRecordedAmigaWord(&B1bbbe[2]))	//opponents.random.steering.count
@@ -1407,9 +1407,9 @@ long power = opp_engine_power;
 
 
 // Tested against Amiga
-static void AdjustOpponentsEngineAcceleration( void )
+static void AdjustOpponentsEngineAcceleration(void)
 {
-long speed_value, speed, opponents_required_z_speed;
+	long speed_value, speed, opponents_required_z_speed;
 
 #ifdef TEST_AMIGA_AOEA
 	long temp;
@@ -1469,9 +1469,9 @@ long speed_value, speed, opponents_required_z_speed;
 
 
 // Tested against Amiga
-static void UpdateOpponentsZSpeed( void )
+static void UpdateOpponentsZSpeed(void)
 {
-long acceleration_adjust = 0, s, a;
+	long acceleration_adjust = 0, s, a;
 
 #ifdef TEST_AMIGA_UOZS
 	long temp;
@@ -1554,8 +1554,8 @@ long acceleration_adjust = 0, s, a;
 	opponents_z_speed += acceleration;
 	if (opponents_z_speed < 0) opponents_z_speed = 0;
 
-//	VALUE2 = opponents_engine_z_acceleration;
-//	VALUE3 = opponents_z_speed;
+	//	VALUE2 = opponents_engine_z_acceleration;
+	//	VALUE3 = opponents_z_speed;
 #ifdef TEST_AMIGA_UOZS
 	CompareRecordedAmigaWord("opponents.engine.z.acceleration", &opponents_engine_z_acceleration);
 	CompareRecordedAmigaWord("opponents.z.speed", &opponents_z_speed);
@@ -1579,14 +1579,14 @@ static long difference_between_players = 0;
 static long smallest_distance_between_players = 0;
 
 
-static void CalculateDistancesBetweenPlayers( void )
+static void CalculateDistancesBetweenPlayers(void)
 {
-static long distances_around_road[MAX_PIECES_PER_TRACK], total_road_distance;
-static long previousTrackID = NO_TRACK;
+	static long distances_around_road[MAX_PIECES_PER_TRACK], total_road_distance;
+	static long previousTrackID = NO_TRACK;
 
-//	VALUE1 = player_current_piece;
-//	VALUE2 = players_distance_into_section;
-//	VALUE3 = opponents_current_piece;
+	//	VALUE1 = player_current_piece;
+	//	VALUE2 = players_distance_into_section;
+	//	VALUE3 = opponents_current_piece;
 
 	// Re-calculate road distances when track changes
 	if (previousTrackID != TrackID)
@@ -1594,11 +1594,11 @@ static long previousTrackID = NO_TRACK;
 		long piece;
 		long distance = 0;
 		for (piece = 0; piece < NumTrackPieces; piece++)
-			{
+		{
 			distances_around_road[piece] = distance << 5;
 
 			distance += Track[piece].numSegments;
-			}
+		}
 		total_road_distance = distance << 5;
 
 		previousTrackID = TrackID;
@@ -1610,11 +1610,11 @@ static long previousTrackID = NO_TRACK;
 	// NOTE: following value can only be relied upon when player and opponent are on same piece
 	// (it's wrong when they're on different sides of track start/end, e.g. opponent on piece 0, player on piece 43)
 	difference_between_players = diff;
-//	VALUE1 = diff;
+	//	VALUE1 = diff;
 	/*
 	fprintf(out, "opponent %2x %3x, player %2x %3x, diff %x\n",
-		opponents_current_piece, opponents_distance_into_section,
-		player_current_piece, players_distance_into_section, difference_between_players);
+	opponents_current_piece, opponents_distance_into_section,
+	player_current_piece, players_distance_into_section, difference_between_players);
 	*/
 
 	abs_diff = abs(diff);
@@ -1630,14 +1630,14 @@ static long previousTrackID = NO_TRACK;
 	else
 		smallest_distance_between_players = opposite;
 
-//	VALUE2 = smallest_distance_between_players;
+	//	VALUE2 = smallest_distance_between_players;
 
 	if (diff > 0)
 		opponent_behind_player = TRUE;
 	else
 		opponent_behind_player = FALSE;
 
-//	VALUE3 = opponent_behind_player ? 1 : 0;
+	//	VALUE3 = opponent_behind_player ? 1 : 0;
 	return;
 }
 
@@ -1648,12 +1648,12 @@ static long previousTrackID = NO_TRACK;
 /*	Description:	Returns negative if player is winning									*/
 /*	======================================================================================= */
 
-extern long lapNumber[];
+extern long lapNumber [];
 
 
-long CalculateIfWinning( long start_finish_piece )
+long CalculateIfWinning(long start_finish_piece)
 {
-long result, p, o;
+	long result, p, o;
 
 	result = lapNumber[OPPONENT] - lapNumber[PLAYER];
 	if (result != 0)	// on different laps
@@ -1694,10 +1694,10 @@ extern long player_z_speed;
 extern long front_left_damage, front_right_damage, rear_damage, damaged;
 
 
-static void CarToCarCollisionDetection( void )
+static void CarToCarCollisionDetection(void)
 {
-// TO DO: Tidy up, rename variables, remove gotos
-long d0, d3, d4;
+	// TO DO: Tidy up, rename variables, remove gotos
+	long d0, d3, d4;
 
 	if (!drop_start_done)
 		return;
@@ -1802,9 +1802,9 @@ static long cars_collided_delay = 0;
 extern long car_collision_x_acceleration, car_collision_y_acceleration, car_collision_z_acceleration;
 
 
-void CarToCarCollision( void )
+void CarToCarCollision(void)
 {
-long d0;
+	long d0;
 
 	if (cars_collided_delay > 0)
 		--cars_collided_delay;
@@ -1834,13 +1834,13 @@ long d0;
 	car_to_car_y_acceleration = 0;
 	car_to_car_z_acceleration = 0;
 
-//******** Play collision sound if necessary ********
+	//******** Play collision sound if necessary ********
 
 	if (cars_collided_delay > 0)
 		return;
 
 	//HitCarSoundBuffer->SetCurrentPosition(0);
-	HitCarSoundBuffer->Play(NULL,NULL,NULL);	// not looping
+	HitCarSoundBuffer->Play(NULL, NULL, NULL);	// not looping
 
 	cars_collided_delay = 5;
 	return;
@@ -1855,14 +1855,14 @@ long d0;
 
 static long opponents_suggested_road_x_position;
 
-extern unsigned char sections_car_can_be_put_on[];
+extern unsigned char sections_car_can_be_put_on [];
 
 
 // Tested against Amiga
-static void OpponentPlayerInteraction( void )
+static void OpponentPlayerInteraction(void)
 {
-// TO DO: Tidy up, rename variables, remove gotos
-long d0, d1, d2;
+	// TO DO: Tidy up, rename variables, remove gotos
+	long d0, d1, d2;
 
 	//VALUE2 = players_road_x_position;
 	//VALUE3 = rear_wheel_surface_x_position;
@@ -1935,7 +1935,7 @@ close_checked:
 	//if ((opponents_road_x_position & 0xff) != 0)
 	//	goto opi3;
 
-//opi1
+	//opi1
 	if (x_difference >= 50)
 		goto opi3;
 
@@ -2004,14 +2004,14 @@ opi9:
 	OpponentPushPlayer();
 	goto opif;
 
-// Player and opponent atleast $100 from each other (ahead or behind)
+	// Player and opponent atleast $100 from each other (ahead or behind)
 far_away:
 	d2 = 64;
 	if (opponent_attributes[opponentsID] & DRIVES_NEAR_EDGE)
 		d2 = 110;
 
 	if (opponentsID & 1)
-		d2 = 255-d2;	// to other side of road
+		d2 = 255 - d2;	// to other side of road
 
 	opponents_suggested_road_x_position = d2;
 
@@ -2094,7 +2094,7 @@ opi13:
 
 // Tested against Amiga
 // position opponent on left or right
-static void MoveOpponentToOneSide( void )
+static void MoveOpponentToOneSide(void)
 {
 #ifdef TEST_AMIGA_MOTOS
 	if (GetRecordedAmigaWord(&x_difference))
@@ -2107,15 +2107,15 @@ static void MoveOpponentToOneSide( void )
 	}
 #endif
 
-long d0 = x_difference;
+	long d0 = x_difference;
 
 	if (d0 >= 56)
 		return;
-//	++VALUE3;
+	//	++VALUE3;
 	if (player_to_right & 0x80)
 		opponents_suggested_road_x_position = 32;
 	else
-		opponents_suggested_road_x_position = 256-32;
+		opponents_suggested_road_x_position = 256 - 32;
 
 #ifdef TEST_AMIGA_MOTOS
 	CompareRecordedAmigaWord("opponents.suggested.road.x.position", &opponents_suggested_road_x_position);
@@ -2126,9 +2126,9 @@ long d0 = x_difference;
 
 // Tested against Amiga
 // opponent pushing player off track
-static void OpponentPushPlayer( void )
+static void OpponentPushPlayer(void)
 {
-long d0 = x_difference;
+	long d0 = x_difference;
 
 	if (d0 >= 56)
 		return;
@@ -2138,16 +2138,16 @@ long d0 = x_difference;
 	if (player_to_right & 0x80)
 	{
 		if (d0 < 96)
-			opponents_suggested_road_x_position = 256-32;
+			opponents_suggested_road_x_position = 256 - 32;
 		else
 			opponents_suggested_road_x_position = 32;
 	}
 	else
 	{
-		if (d0 >= (256-96))
+		if (d0 >= (256 - 96))
 			opponents_suggested_road_x_position = 32;
 		else
-			opponents_suggested_road_x_position = 256-32;
+			opponents_suggested_road_x_position = 256 - 32;
 	}
 
 	return;
@@ -2160,8 +2160,8 @@ long d0 = x_difference;
 /*	Description:	Calculate distance between opponent and player							*/
 /*	======================================================================================= */
 
-long CalculateOpponentsDistance (void)
-	{
+long CalculateOpponentsDistance(void)
+{
 	// should do every fourth frame
 
 	long dist = smallest_distance_between_players;
@@ -2172,4 +2172,4 @@ long CalculateOpponentsDistance (void)
 		dist = -dist;
 
 	return(dist);
-	}
+}

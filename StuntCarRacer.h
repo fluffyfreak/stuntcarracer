@@ -8,12 +8,12 @@
 #define SCR_BASE_COLOUR	26
 
 typedef enum
-	{
+{
 	TRACK_MENU = 0,
 	TRACK_PREVIEW,
 	GAME_IN_PROGRESS,
 	GAME_OVER
-	} GameModeType;
+} GameModeType;
 
 /*
 // Untransformed coloured vertex
@@ -29,31 +29,31 @@ typedef enum
 // Untransformed coloured vertex
 struct UTVERTEX
 {
-    D3DXVECTOR3 pos;	// The untransformed position for the vertex
-	D3DXVECTOR3 normal;	// The surface normal for the vertex
-    DWORD color;		// The vertex diffuse color value
+D3DXVECTOR3 pos;	// The untransformed position for the vertex
+D3DXVECTOR3 normal;	// The surface normal for the vertex
+DWORD color;		// The vertex diffuse color value
 };
 */
 // Untransformed coloured textured vertex
 struct UTVERTEX
 {
-    D3DXVECTOR3 pos;	// The untransformed position for the vertex
-    DWORD color;		// The vertex diffuse color value
-	FLOAT tu,tv;		// The texture co-ordinates
+	D3DXVECTOR3 pos;	// The untransformed position for the vertex
+	DWORD color;		// The vertex diffuse color value
+	FLOAT tu, tv;		// The texture co-ordinates
 };
 
 /*	============================== */
 /*	External function declarations */
 /*	============================== */
-extern void GetScreenDimensions( long *screen_width,
-								 long *screen_height );
+extern void GetScreenDimensions(long *screen_width,
+	long *screen_height);
 
-extern DWORD SCRGB (long colour_index);
-extern DWORD SCColour (long colour_index);
+extern DWORD SCRGB(long colour_index);
+extern DWORD SCColour(long colour_index);
 
-extern void SetSolidColour (long colour_index);
-extern void SetLineColour (long colour_index);
-extern void SetTextureColour (long colour_index);
+extern void SetSolidColour(long colour_index);
+extern void SetLineColour(long colour_index);
+extern void SetTextureColour(long colour_index);
 
 // Debug
 extern long VALUE1, VALUE2, VALUE3;

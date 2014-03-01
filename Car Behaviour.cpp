@@ -1,44 +1,44 @@
 /**************************************************************************
 
-    Car Behaviour.cpp - Functions relating to player's car behaviour
+	Car Behaviour.cpp - Functions relating to player's car behaviour
 
 	NOTE: Best to always start a car off on a straight (non-diagonal) piece
 
 	NOTE: All statics and globals that have been initialised will need to be
-		  reinitialised when the car is repositioned on the track (e.g. at
-		  start of race and when put back on track after coming off)
+	reinitialised when the car is repositioned on the track (e.g. at
+	start of race and when put back on track after coming off)
 
 	NOTE: player_x and player_z are in PC StuntCarRacer format
-		  player_y is currently in Amiga StuntCarRacer format
-		  Angles have the same magnitude but are unsigned.
-		  And sin/cos/tan also need alteration (divide by 2)
+	player_y is currently in Amiga StuntCarRacer format
+	Angles have the same magnitude but are unsigned.
+	And sin/cos/tan also need alteration (divide by 2)
 
 
-/* OUTSTANDING ISSUES / IMPROVEMENTS :-
+	/* OUTSTANDING ISSUES / IMPROVEMENTS :-
 
 	1.  SOME FUNCTIONS CONTAIN LOGIC THAT IS DEPENDANT UPON THE ORDER THAT THE
-		TRACK PIECES ARE STORED IN (I.E. WHETHER THE PIECE NUMBERS INCREMENT
-		AROUND THE TRACK IN A CLOCKWISE OR ANTI-CLOCKWISE MANNER)
-	
-		LINES THAT HAVE ALREADY BEEN IDENTIFIED HAVE THE COMMENT :-
+	TRACK PIECES ARE STORED IN (I.E. WHETHER THE PIECE NUMBERS INCREMENT
+	AROUND THE TRACK IN A CLOCKWISE OR ANTI-CLOCKWISE MANNER)
 
-				// DIRECTION DEPENDANT
+	LINES THAT HAVE ALREADY BEEN IDENTIFIED HAVE THE COMMENT :-
 
-		- NEED TO IMPLEMENT A TRACK DIRECTION VALUE (1 OR -1) THAT IS EITHER
-		STORED WITH THE TRACK DEFINITION OR CALCULATED AT THE START OF A RACE.
-		THE LOGIC WOULD THEN USE THIS VALUE RATHER THAN JUST ADDING OR
-		SUBTRACTING 1.
+	// DIRECTION DEPENDANT
 
- **************************************************************************/
+	- NEED TO IMPLEMENT A TRACK DIRECTION VALUE (1 OR -1) THAT IS EITHER
+	STORED WITH THE TRACK DEFINITION OR CALCULATED AT THE START OF A RACE.
+	THE LOGIC WOULD THEN USE THIS VALUE RATHER THAN JUST ADDING OR
+	SUBTRACTING 1.
+
+	**************************************************************************/
 
 /*
  * Unfortunately these HIGHER_FRAME_RATE changes didn't work...
  *
-//#define	HIGHER_FRAME_RATE	// to cater for four times frame rate
-// 10/12/1998 - engine_z_acceleration not now reduced (to enable car to jump as before)
-//			  - could try limiting the top speed instead (should be better)
-//	or try REDUCTION of 202, INCREASE of 306
-*/
+ //#define	HIGHER_FRAME_RATE	// to cater for four times frame rate
+ // 10/12/1998 - engine_z_acceleration not now reduced (to enable car to jump as before)
+ //			  - could try limiting the top speed instead (should be better)
+ //	or try REDUCTION of 202, INCREASE of 306
+ */
 
 /*	============= */
 /*	Include files */
@@ -107,14 +107,14 @@ long player_y;
 long player_z_speed = 0;
 
 long front_left_damage = 0,
-	 front_right_damage = 0,
-	 rear_damage = 0;
+front_right_damage = 0,
+rear_damage = 0;
 long damaged = 0;
 long new_damage = 0;
 
 long car_collision_x_acceleration,
-	 car_collision_y_acceleration,
-	 car_collision_z_acceleration;
+car_collision_y_acceleration,
+car_collision_z_acceleration;
 
 long boostReserve = 0, boostUnit = 0;
 long playerLapNumber;
@@ -137,18 +137,18 @@ extern IDirectSoundBuffer8 *OffRoadSoundBuffer;
 /*	Static data */
 /*	=========== */
 static long player_x,
-			player_z;
+player_z;
 
 static long player_x_angle = 0,
-			player_y_angle = 0,
-			player_z_angle = 0;
+player_y_angle = 0,
+player_z_angle = 0;
 
 static long player_world_x_speed = 0,
-			player_world_y_speed = 0,
-			player_world_z_speed = 0;
+player_world_y_speed = 0,
+player_world_z_speed = 0;
 
 static long player_x_speed = 0,
-			player_y_speed = 0;
+player_y_speed = 0;
 
 static long accelerate, brake;
 
@@ -182,7 +182,7 @@ static long smaller_limit_required = FALSE;
 
 static long wreck_wheel_height_reduction = 0;		// 0x200 if wrecked
 
-	// set the on_chains flag to FALSE for now (won't implement chains at first)
+// set the on_chains flag to FALSE for now (won't implement chains at first)
 static long on_chains = FALSE;
 
 static long player_distance_off_road;	// used to determine the value below
@@ -191,8 +191,8 @@ static long off_map_status = 0;	// not set exactly like Amiga StuntCarRacer
 static long off_track_count = 0;
 
 static long gravity_x_acceleration,
-			gravity_y_acceleration,
-			gravity_z_acceleration;
+gravity_y_acceleration,
+gravity_z_acceleration;
 
 static long grounded_delay = 0;
 static long grounded_count = 0;
@@ -200,36 +200,36 @@ static long damage_value = 0;
 static long damaged_count = 0;
 
 static long front_left_amount_below_road = 0,
-			front_right_amount_below_road = 0,
-			rear_amount_below_road = 0;
+front_right_amount_below_road = 0,
+rear_amount_below_road = 0;
 
 static long old_front_left_difference = 0,
-			old_front_right_difference = 0,
-			old_rear_difference = 0;
+old_front_right_difference = 0,
+old_rear_difference = 0;
 
 static long smashed_countdown = 0;
 
 static long car_to_road_collision_z_acceleration;
 
 static long player_x_acceleration,
-			player_y_acceleration,
-			player_z_acceleration;
+player_y_acceleration,
+player_z_acceleration;
 
 static long total_world_x_acceleration,
-			total_world_y_acceleration,
-			total_world_z_acceleration;
+total_world_y_acceleration,
+total_world_z_acceleration;
 
 static long player_x_rotation_speed = 0,
-			player_y_rotation_speed = 0,
-			player_z_rotation_speed = 0;
+player_y_rotation_speed = 0,
+player_z_rotation_speed = 0;
 
 static long player_final_x_rotation_speed,
-			player_final_y_rotation_speed,
-			player_final_z_rotation_speed;
+player_final_y_rotation_speed,
+player_final_z_rotation_speed;
 
 static long player_x_rotation_acceleration,
-			player_y_rotation_acceleration,
-			player_z_rotation_acceleration;
+player_y_rotation_acceleration,
+player_z_rotation_acceleration;
 
 static long Replay = FALSE, ReplayRequested = FALSE, ReplayLooping = FALSE, ReplayFinished = FALSE;
 
@@ -242,97 +242,97 @@ static long AmigaRecordingFrame = 0;
 /*	===================== */
 /*	Function declarations */
 /*	===================== */
-static void CarControl (DWORD input);
-static void BoostPower (long boost_flag,
-						long accelerate,
-						long brake);
+static void CarControl(DWORD input);
+static void BoostPower(long boost_flag,
+	long accelerate,
+	long brake);
 
-static void CarMovement (void);
-static long GetPieceUsingMap (long x, long z, long *piece_out);
-static void CalcXZRelativeToPiece (long x, long z, long piece, long *rx_out, long *rz_out);
+static void CarMovement(void);
+static long GetPieceUsingMap(long x, long z, long *piece_out);
+static void CalcXZRelativeToPiece(long x, long z, long piece, long *rx_out, long *rz_out);
 
-static void CalculateWheelXZOffsets (void);
+static void CalculateWheelXZOffsets(void);
 
-static void CalculateRoadWheelHeights (void);
-static void CalculateRoadWheelHeight (long height, long *height_out);
-static void CalculateIfCarOffRoad (long *height);
-static void CalculateWorldRoadHeight (long wheel, long x, long z, long *y_out);
+static void CalculateRoadWheelHeights(void);
+static void CalculateRoadWheelHeight(long height, long *height_out);
+static void CalculateIfCarOffRoad(long *height);
+static void CalculateWorldRoadHeight(long wheel, long x, long z, long *y_out);
 
-static void GetSurfaceCoords (long piece, long segment);
-static long CalcDistanceOffRoad (long x, long z,
-								 long ox, long oz,
-								 long ux, long uz,
-								 long vx, long vz,
-								 long *ex, long *ez);
-static void CalcSurfacePosition (long piece,
-								 long x, long z,
-								 long ox, long oz,
-								 long ux, long uz,
-								 long vx, long vz,
-								 long *sx, long *sz,
-								 long *road_x,
-								 long *segment_out);
+static void GetSurfaceCoords(long piece, long segment);
+static long CalcDistanceOffRoad(long x, long z,
+	long ox, long oz,
+	long ux, long uz,
+	long vx, long vz,
+	long *ex, long *ez);
+static void CalcSurfacePosition(long piece,
+	long x, long z,
+	long ox, long oz,
+	long ux, long uz,
+	long vx, long vz,
+	long *sx, long *sz,
+	long *road_x,
+	long *segment_out);
 
-static void CalculateActualWheelHeights (void);
-static void CalculateXZSpeeds (void);
-static void CalculateGravityAcceleration (void);
-static void CarCollisionDetection (void);
-static void CalculateWheelCollision (long road_height,
-									 long actual_height,
-									 long *height_difference_out,
-									 long *old_difference_in_out,
-									 long *amount_below_road_in_out,
-									 long *damage_in_out);
-static void CalculateCarCollisionAcceleration (long average_amount_below_road);
-static void CalculateInclinationSinCos (long inclination_in,
-										long *inclination_sin_out,
-										long *inclination_cos_out);
-static void LiftCarOntoTrack (void);
+static void CalculateActualWheelHeights(void);
+static void CalculateXZSpeeds(void);
+static void CalculateGravityAcceleration(void);
+static void CarCollisionDetection(void);
+static void CalculateWheelCollision(long road_height,
+	long actual_height,
+	long *height_difference_out,
+	long *old_difference_in_out,
+	long *amount_below_road_in_out,
+	long *damage_in_out);
+static void CalculateCarCollisionAcceleration(long average_amount_below_road);
+static void CalculateInclinationSinCos(long inclination_in,
+	long *inclination_sin_out,
+	long *inclination_cos_out);
+static void LiftCarOntoTrack(void);
 
-static void CalculateTotalAcceleration (void);
-static long GetTwiceCollisionYAcceleration (void);
-static void CalculateXAcceleration (void);
+static void CalculateTotalAcceleration(void);
+static long GetTwiceCollisionYAcceleration(void);
+static void CalculateXAcceleration(void);
 
-static void CalculateSteering (void);
-static void CalculateSteeringAcceleration (long steering_amount);
-static void AlignCarWithRoad (void);
-static void AdjustSteeringAcceleration (void);
-static void IdentifyPiece (long x, long z, long *piece_in_out);
-static void GetPieceCoords (long piece);
+static void CalculateSteering(void);
+static void CalculateSteeringAcceleration(long steering_amount);
+static void AlignCarWithRoad(void);
+static void AdjustSteeringAcceleration(void);
+static void IdentifyPiece(long x, long z, long *piece_in_out);
+static void GetPieceCoords(long piece);
 
-static void CalculateWorldAcceleration (void);
-static void ReduceWorldAcceleration (void);
+static void CalculateWorldAcceleration(void);
+static void ReduceWorldAcceleration(void);
 
-static void CalculateXZRotationAcceleration (void);
-static void UpdatePlayersRotationSpeed (void);
-static void CalculateFinalRotationSpeed (void);
-static void UpdatePlayersWorldSpeed (void);
-static void UpdatePlayersPosition (void);
+static void CalculateXZRotationAcceleration(void);
+static void UpdatePlayersRotationSpeed(void);
+static void CalculateFinalRotationSpeed(void);
+static void UpdatePlayersWorldSpeed(void);
+static void UpdatePlayersPosition(void);
 
-static long CalcSectionYAngle (long piece,
-							   long x,
-							   long z);
-static void CalcCurveMeasurements (long piece,
-								   long x,
-								   long z,
-								   long *y_angle_out,
-								   long *radius_out,
-								   double *distance_from_centre_out);
+static long CalcSectionYAngle(long piece,
+	long x,
+	long z);
+static void CalcCurveMeasurements(long piece,
+	long x,
+	long z,
+	long *y_angle_out,
+	long *radius_out,
+	double *distance_from_centre_out);
 
-static void PositionCarAbovePiece (long piece);
-static void UpdateEngineRevs (void);
-static void DrawDustClouds (void);
-static void DrawSparks (void);
+static void PositionCarAbovePiece(long piece);
+static void UpdateEngineRevs(void);
+static void DrawDustClouds(void);
+static void DrawSparks(void);
 
 #ifdef NOT_USED
-static void RewindRecording (void);
-static void Record (DWORD input);
-static void PlayBack (DWORD *input);
-static void ReadRecordedFile (void);
+static void RewindRecording(void);
+static void Record(DWORD input);
+static void PlayBack(DWORD *input);
+static void ReadRecordedFile(void);
 #endif
 
 #ifdef USE_AMIGA_RECORDING
-static bool OpenAmigaRecording( void );
+static bool OpenAmigaRecording(void);
 #endif
 
 /*	======================================================================================= */
@@ -341,8 +341,8 @@ static bool OpenAmigaRecording( void );
 /*	Description:	Reset all car behaviour variables to their initial state				*/
 /*	======================================================================================= */
 
-void ResetPlayer (void)
-	{
+void ResetPlayer(void)
+{
 	// resets almost everything at the moment, just to make sure
 	player_x = 0;
 	player_y = 0;
@@ -464,7 +464,7 @@ void ResetPlayer (void)
 	player_y_rotation_acceleration = 0;
 	player_z_rotation_acceleration = 0;
 	return;
-	}
+}
 
 
 /*	======================================================================================= */
@@ -488,80 +488,80 @@ extern long HalfALapPiece;
 long INITIALISE_PLAYER = TRUE;
 
 
-void CarBehaviour (DWORD input,
-				   long *x,
-				   long *y,
-				   long *z,
-				   long *x_angle,
-				   long *y_angle,
-				   long *z_angle)
-	{
+void CarBehaviour(DWORD input,
+	long *x,
+	long *y,
+	long *z,
+	long *x_angle,
+	long *y_angle,
+	long *z_angle)
+{
 	static long first_time = TRUE;
 
 	// temporarily set player values to values provided when required
 	if (INITIALISE_PLAYER)
-		{
+	{
 		INITIALISE_PLAYER = FALSE;
 
-		if (! Replay)
-			{
+		if (!Replay)
+		{
 			player_x = *x;
 			player_y = -(*y / LOCAL_Y_FACTOR);
 			player_z = *z;
 			player_x_angle = (*x_angle);
 			player_y_angle = (*y_angle);
 			player_z_angle = (*z_angle);
-			}
 		}
+	}
 
 
 	// reset player and control action replay as required
 	if ((off_track_count > OFF_TRACK_LIMIT) ||
-	    (bNewGame) ||
+		(bNewGame) ||
 		(ReplayRequested))
-		{
+	{
 		ResetPlayer();
 
 		if (bNewGame || ReplayRequested)
-			{
+		{
 			// reset all animated objects
 			ResetDrawBridge();
 			ReplayFinished = FALSE;
-			}
+		}
 
 		if (off_track_count > OFF_TRACK_LIMIT)
-			{
+		{
 			PositionCarAbovePiece(player_current_piece);
-			}
+		}
 		else
-			{
+		{
 			PositionCarAbovePiece(PlayersStartPiece);
-			}
+		}
 		drop_start_done = FALSE;
 
 		if (bNewGame)
-			{
+		{
 			// reset action replay recording
-//			Replay = FALSE;
-//			RewindRecording();
+			//			Replay = FALSE;
+			//			RewindRecording();
 
 #ifdef USE_AMIGA_RECORDING
 			CloseAmigaRecording();		// So that play will start from beginning
 			ReplayAmigaRecording = TRUE;
 #endif
-			}
+		}
 
 #ifdef NOT_USED
 		if (ReplayRequested)
-			{
+		{
 			// begin action replay if requested
 			Replay = TRUE;
-			}
+		}
 #endif
 
 		off_track_count = 0;
-//		ReplayRequested = FALSE;
-		}
+		//		ReplayRequested = FALSE;
+	}
 
 	//VALUE1 = Replay;
 
@@ -569,24 +569,24 @@ void CarBehaviour (DWORD input,
 	// replay doesn't currently work on DrawBridge - doesn't know starting DrawBridge frame
 
 	if (ReplayFinished)
-        {
-        if (ReplayLooping)
-            {
-        	RewindRecording();
-        	ReplayRequested = TRUE;
-            }
-	    return;
-        }
-
-	if (! Replay)
+	{
+		if (ReplayLooping)
 		{
-		Record(input);
+			RewindRecording();
+			ReplayRequested = TRUE;
 		}
+		return;
+	}
+
+	if (!Replay)
+	{
+		Record(input);
+	}
 	else
-		{
+	{
 		// override user input with recorded value
 		PlayBack(&input);
-		}
+	}
 #endif
 
 	CarControl(input);
@@ -615,7 +615,7 @@ void CarBehaviour (DWORD input,
 	first_time = FALSE;
 
 	//VALUE1++;		// frame counter
-	}
+}
 
 /*	======================================================================================= */
 /*	Function:		LimitViewpointY															*/
@@ -626,18 +626,18 @@ void CarBehaviour (DWORD input,
 
 #define Y_ADJUSTMENT_THRESHOLD 0x480
 
-void LimitViewpointY (long *y)
-	{
+void LimitViewpointY(long *y)
+{
 	long saved_player_z_speed = player_z_speed;
 	short sin_x, cos_x;
 	short sin_z, cos_z;
 	long ry = 0, ly = 0;
 
-//	VALUE1 = (bTestKey ? 1 : 0);
+	//	VALUE1 = (bTestKey ? 1 : 0);
 	// calculate required sin.cos values using player x, y and z angles
 	CalcYXZTrigCoefficients(player_x_angle,
-							player_y_angle,
-							player_z_angle);
+		player_y_angle,
+		player_z_angle);
 
 	player_z_speed = 0xA00;	// prevent CalculateRoadWheelHeight from averaging current and previous heights
 
@@ -662,11 +662,11 @@ void LimitViewpointY (long *y)
 	GetSinCos(player_x_angle, &sin_x, &cos_x);	// cosine not used
 	GetSinCos(player_z_angle, &sin_z, &cos_z);	// cosine not used
 
-//	VALUE1 = player_y;
-//	VALUE1 = front_right_road_height - front_right_actual_height;
-//	VALUE2 = VALUE3 = 0;
+	//	VALUE1 = player_y;
+	//	VALUE1 = front_right_road_height - front_right_actual_height;
+	//	VALUE2 = VALUE3 = 0;
 	if ((front_right_road_height - front_right_actual_height) > Y_ADJUSTMENT_THRESHOLD)
-		{
+	{
 		// Use the CalculateActualWheelHeights() calculations in reverse, with road height, to calculate adjusted player_y
 		/*
 		front_right_actual_height = player_y;
@@ -681,15 +681,15 @@ void LimitViewpointY (long *y)
 #endif
 			ry = (front_right_road_height - Y_ADJUSTMENT_THRESHOLD) << 8;
 
-		ry += ((long)sin_z << (3+15-LOG_PRECISION));
-		ry -= ((long)sin_x << (4+15-LOG_PRECISION));
-//		VALUE2 = ry;
-		}
+		ry += ((long) sin_z << (3 + 15 - LOG_PRECISION));
+		ry -= ((long) sin_x << (4 + 15 - LOG_PRECISION));
+		//		VALUE2 = ry;
+	}
 
-//	VALUE1 = front_left_road_height - front_left_actual_height;
-//	VALUE2 = VALUE3 = 0;
+	//	VALUE1 = front_left_road_height - front_left_actual_height;
+	//	VALUE2 = VALUE3 = 0;
 	if ((front_left_road_height - front_left_actual_height) > Y_ADJUSTMENT_THRESHOLD)
-		{
+	{
 		// Use the CalculateActualWheelHeights() calculations in reverse, with road height, to calculate adjusted player_y
 		/*
 		front_left_actual_height = player_y;
@@ -704,49 +704,49 @@ void LimitViewpointY (long *y)
 #endif
 			ly = (front_left_road_height - Y_ADJUSTMENT_THRESHOLD) << 8;
 
-		ly -= ((long)sin_z << (3+15-LOG_PRECISION));
-		ly -= ((long)sin_x << (4+15-LOG_PRECISION));
-//		VALUE3 = ly;
-		}
+		ly -= ((long) sin_z << (3 + 15 - LOG_PRECISION));
+		ly -= ((long) sin_x << (4 + 15 - LOG_PRECISION));
+		//		VALUE3 = ly;
+	}
 
 	if (ry)
-		{
+	{
 		if (ly)
 		{
 			*y = -(((ry + ly) * LOCAL_Y_FACTOR) / 2);	// use average of two values
-//			VALUE1 = 1;
+			//			VALUE1 = 1;
 		}
 		else
 		{
 			*y = -(ry * LOCAL_Y_FACTOR);
-//			VALUE1 = 2;
+			//			VALUE1 = 2;
 		}
-		}
+	}
 	else if (ly)
-		{
+	{
 		*y = -(ly * LOCAL_Y_FACTOR);
-//		VALUE1 = 3;
-		}
+		//		VALUE1 = 3;
 	}
+}
 
-	/*
-	// Old method...
-	// 19/09/2007 attempt to limit player_y to prevent road disappearing.  Doesn't work completely on Draw Bridge track
-	long front_road_height = (front_left_road_height + front_right_road_height) << (8-1);
+/*
+// Old method...
+// 19/09/2007 attempt to limit player_y to prevent road disappearing.  Doesn't work completely on Draw Bridge track
+long front_road_height = (front_left_road_height + front_right_road_height) << (8-1);
 //	long front_road_height = 0;
-	VALUE1 = player_y;
-	VALUE2 = front_road_height;
-	if (player_y > front_road_height)
-	{
-	//*y = -(player_y * LOCAL_Y_FACTOR);
-	VALUE3 = 0;
-	}
-	else
-	{
-	*y = -(front_road_height * LOCAL_Y_FACTOR);
-	VALUE3 = 1;
-	}
-	*/
+VALUE1 = player_y;
+VALUE2 = front_road_height;
+if (player_y > front_road_height)
+{
+//*y = -(player_y * LOCAL_Y_FACTOR);
+VALUE3 = 0;
+}
+else
+{
+*y = -(front_road_height * LOCAL_Y_FACTOR);
+VALUE3 = 1;
+}
+*/
 
 /*	======================================================================================= */
 /*	Function:		CarControl																*/
@@ -754,65 +754,65 @@ void LimitViewpointY (long *y)
 /*	Description:							*/
 /*	======================================================================================= */
 
-static void CarControl (DWORD input)
-	{
-//	Keys that control car are :-
-//			S = left, D = right
-//			RETURN = accelerate + boost
-//			SPACE = brake/reverse + boost
-//			HASH = brake/reverse
-//
-//  Note: Can't accelerate without boost when using keyboard,
-//		  because HASH key is changed to be brake - see below
+static void CarControl(DWORD input)
+{
+	//	Keys that control car are :-
+	//			S = left, D = right
+	//			RETURN = accelerate + boost
+	//			SPACE = brake/reverse + boost
+	//			HASH = brake/reverse
+	//
+	//  Note: Can't accelerate without boost when using keyboard,
+	//		  because HASH key is changed to be brake - see below
 
 	long left = (input & KEY_P1_LEFT),
-		 right = (input & KEY_P1_RIGHT),
-		 boost = (input & KEY_P1_ACCEL_BOOST);
+		right = (input & KEY_P1_RIGHT),
+		boost = (input & KEY_P1_ACCEL_BOOST);
 
 	// 20/05/2007 - accelerate and brake variables are needed for UpdateEngineRevs
 	accelerate = (input & KEY_P1_HASH);
 	brake = (input & KEY_P1_BRAKE_BOOST);
 
 	if (input & KEY_P1_ACCEL_BOOST)
-		{
+	{
 		accelerate = TRUE;	//	boost also selects accelerate
-		}
+	}
 
 	if (input & KEY_P1_BRAKE_BOOST)
-		{
+	{
 		boost = TRUE;	//	brake also selects boost
-		}
+	}
 
 	if (input & KEY_P1_HASH)	// see note above
-		{
+	{
 		brake = TRUE;	// select brake
 		accelerate = FALSE;
-		}
+	}
 
 	// if none of the resulting keys are pressed then read joystick
-	if( !input )
+	if (!input)
 	{
-		if(P1Controller.IsConnected())
+		if (P1Controller.IsConnected())
 		{
 			// easier to read...
 			const XINPUT_GAMEPAD &pad = P1Controller.GetState().Gamepad;
-			if(pad.bRightTrigger)
+			if (pad.bRightTrigger)
 			{
 				accelerate = TRUE;
 			}
 
-			if(pad.wButtons & XINPUT_GAMEPAD_A)
+			if (pad.wButtons & XINPUT_GAMEPAD_A)
 			{
 				boost = TRUE;
 			}
 
-			if(pad.wButtons & XINPUT_GAMEPAD_B || pad.bLeftTrigger)
+			if (pad.wButtons & XINPUT_GAMEPAD_B || pad.bLeftTrigger)
 			{
 				brake = TRUE;	// select brake
 				accelerate = FALSE;
 			}
 
-			if( abs(pad.sThumbLX) > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE )
+			if (abs(pad.sThumbLX) > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
 			{
 				(pad.sThumbLX < 0) ? (left = TRUE) : (right = TRUE);
 			}
@@ -820,13 +820,13 @@ static void CarControl (DWORD input)
 	}
 
 	left_right_value = 0;
-	if ((touching_road) && (! on_chains))
-		{
+	if ((touching_road) && (!on_chains))
+	{
 		if (left)
 			left_right_value = -15;
 		if (right)
 			left_right_value = 15;
-		}
+	}
 
 	long boost_flag;	// active low
 	if (boost)
@@ -834,35 +834,35 @@ static void CarControl (DWORD input)
 	else
 		boost_flag = TRUE;
 
-	if ((player_z_speed < 120*256) && (! on_chains) && (NOT_WRECKED))
-		{
+	if ((player_z_speed < 120 * 256) && (!on_chains) && (NOT_WRECKED))
+	{
 		if (accelerate)
-			{
+		{
 			engine_z_acceleration = engine_power;
 			accelerating = TRUE;
-			}
+		}
 		else
 			if (brake)
-				{
+			{
 				engine_z_acceleration = -240;
 				accelerating = FALSE;
-				}
+			}
 			else
 				if (accelerating)
-					{
+				{
 					// car keeps accelerating even when control released
 					engine_z_acceleration = engine_power;
 					accelerating = TRUE;	// already TRUE
-					}
+				}
 				else
 					engine_z_acceleration = 0;
-		}
+	}
 	else
 		engine_z_acceleration = 0;
 
 	BoostPower(boost_flag,
-			   accelerate,
-			   brake);
+		accelerate,
+		brake);
 
 #ifdef PLAY_AMIGA_RECORDING
 	GetRecordedAmigaWord(&left_right_value);
@@ -870,36 +870,36 @@ static void CarControl (DWORD input)
 	//VALUE1 = engine_z_acceleration;
 #endif
 	return;
-	}
+}
 
 
-static void BoostPower (long boost_flag,
-						long accelerate,
-						long brake)
-	{
+static void BoostPower(long boost_flag,
+	long accelerate,
+	long brake)
+{
 	boost_activated = 0;
 
-	if ((! boost_flag) && (NOT_WRECKED))
-		{
+	if ((!boost_flag) && (NOT_WRECKED))
+	{
 		if (accelerating || (accelerate || brake))
-			{
+		{
 			if (boostReserve > 0)
-				{
+			{
 				--boostUnit;
 				if (boostUnit < 0)
-					{
+				{
 					boostUnit = boost_unit_value;
 					--boostReserve;
-					}
+				}
 
 				boost_activated = 0x80;
 				engine_z_acceleration *= 2;
-				}
 			}
 		}
+	}
 
 	return;
-	}
+}
 
 
 /*	======================================================================================= */
@@ -908,14 +908,14 @@ static void BoostPower (long boost_flag,
 /*	Description:							*/
 /*	======================================================================================= */
 
-static void CarMovement (void)
-	{
+static void CarMovement(void)
+{
 	// currently uses player_x/y/z and player_x/y/z_angle
 
 	//calculate required sin.cos values using player x, y and z angles
 	CalcYXZTrigCoefficients(player_x_angle,
-							player_y_angle,
-							player_z_angle);
+		player_y_angle,
+		player_z_angle);
 
 	//fprintf(out, "player_x_angle %d\n", player_x_angle);
 	//fprintf(out, "player_y_angle %d\n", player_y_angle);
@@ -932,7 +932,7 @@ static void CarMovement (void)
 	CarCollisionDetection();
 
 	//if (B.1bb72 != 0)		// always set
-		{
+	{
 		CalculateTotalAcceleration();
 
 		CalculateSteering();
@@ -943,7 +943,7 @@ static void CarMovement (void)
 		CalculateXZRotationAcceleration();
 		UpdatePlayersRotationSpeed();
 		CalculateFinalRotationSpeed();
-		}
+	}
 
 	UpdatePlayersWorldSpeed();
 	UpdatePlayersPosition();
@@ -951,47 +951,47 @@ static void CarMovement (void)
 #ifdef PLAY_AMIGA_RECORDING
 	if (StartOfAmigaRecording)
 	{
-	GetRecordedAmigaLong(&player_x); player_x *= (PC_FACTOR * 4);
-	GetRecordedAmigaLong(&player_y);
-	GetRecordedAmigaLong(&player_z); player_z *= (PC_FACTOR * 4);
-	GetRecordedAmigaWord(&player_x_angle);
-	GetRecordedAmigaWord(&player_y_angle);
-	GetRecordedAmigaWord(&player_z_angle);
+		GetRecordedAmigaLong(&player_x); player_x *= (PC_FACTOR * 4);
+		GetRecordedAmigaLong(&player_y);
+		GetRecordedAmigaLong(&player_z); player_z *= (PC_FACTOR * 4);
+		GetRecordedAmigaWord(&player_x_angle);
+		GetRecordedAmigaWord(&player_y_angle);
+		GetRecordedAmigaWord(&player_z_angle);
 
-	++AmigaRecordingFrame;
-	if (AmigaRecordingFrame > 0)
-		StartOfAmigaRecording = FALSE;
+		++AmigaRecordingFrame;
+		if (AmigaRecordingFrame > 0)
+			StartOfAmigaRecording = FALSE;
 	}
 	else
 	{
-	// throw values away
-	long temp;
-	GetRecordedAmigaLong(&temp);
-	GetRecordedAmigaLong(&temp);
-	GetRecordedAmigaLong(&temp);
-	GetRecordedAmigaWord(&temp);
-	GetRecordedAmigaWord(&temp);
-	GetRecordedAmigaWord(&temp);
+		// throw values away
+		long temp;
+		GetRecordedAmigaLong(&temp);
+		GetRecordedAmigaLong(&temp);
+		GetRecordedAmigaLong(&temp);
+		GetRecordedAmigaWord(&temp);
+		GetRecordedAmigaWord(&temp);
+		GetRecordedAmigaWord(&temp);
 	}
 #endif
 
 	// 23/08/1998 - extra bit to set flags
-	if (player_distance_off_road >= (256-ROAD_WIDTH/2))
-		{
+	if (player_distance_off_road >= (256 - ROAD_WIDTH / 2))
+	{
 		off_map_status = 0x80;
-		}
+	}
 	else
-		{
+	{
 		off_map_status = 0;
 		off_track_count = 0;
 		smaller_limit_required = FALSE;
-		}
+	}
 
 	if ((off_map_status != 0) && (touching_road) && (player_y < 0x1000000))
-		{
+	{
 		off_track_count++;
 		smaller_limit_required = TRUE;
-		}
+	}
 
 
 	//VALUE1 = player_z_speed;
@@ -1001,9 +1001,9 @@ static void CarMovement (void)
 	//long temp = Track[player_current_piece].numSegments;
 	//VALUE2 = Track[player_current_piece].coords[(temp*4)].y;
 
-//	fprintf(out, "------------------------------------------------------------\n");
+	//	fprintf(out, "------------------------------------------------------------\n");
 	return;
-	}
+}
 
 
 /*	======================================================================================= */
@@ -1012,8 +1012,8 @@ static void CarMovement (void)
 /*	Description:	Use Track_Map to get piece number that world x/z point is within		*/
 /*	======================================================================================= */
 
-static long GetPieceUsingMap (long x, long z, long *piece_out)
-	{
+static long GetPieceUsingMap(long x, long z, long *piece_out)
+{
 	long map_x, map_z, piece;
 
 	// locate the map square that the point is in
@@ -1022,24 +1022,24 @@ static long GetPieceUsingMap (long x, long z, long *piece_out)
 
 	if (((map_x < 0) || (map_x >= NUM_TRACK_CUBES)) ||
 		((map_z < 0) || (map_z >= NUM_TRACK_CUBES)))
-		{
+	{
 		// off the map
 		//fprintf(out, "GetPieceUsingMap - world point is off map\n");
 		return(FALSE);
-		}
+	}
 
 	// lookup piece number within map
 	piece = Track_Map[map_x][map_z];
 	if (piece == -1)
-		{
+	{
 		// no piece at this place on the map
 		//fprintf(out, "GetPieceUsingMap - no piece at map position\n");
 		return(FALSE);
-		}
+	}
 
 	*piece_out = piece;
 	return(TRUE);
-	}
+}
 
 
 /*	======================================================================================= */
@@ -1048,8 +1048,8 @@ static long GetPieceUsingMap (long x, long z, long *piece_out)
 /*	Description:	Calculate position of world x/z point, relative to required piece		*/
 /*	======================================================================================= */
 
-static void CalcXZRelativeToPiece (long x, long z, long piece, long *rx_out, long *rz_out)
-	{
+static void CalcXZRelativeToPiece(long x, long z, long piece, long *rx_out, long *rz_out)
+{
 	long piece_x, piece_z;
 
 	// calculate x/z position of piece's front left corner, within world
@@ -1059,7 +1059,7 @@ static void CalcXZRelativeToPiece (long x, long z, long piece, long *rx_out, lon
 	// calculate point's x/z position relative to the piece (and in same range)
 	*rx_out = (x - piece_x) >> LOG_PRECISION;
 	*rz_out = (z - piece_z) >> LOG_PRECISION;
-	}
+}
 
 
 /*	======================================================================================= */
@@ -1068,137 +1068,137 @@ static void CalcXZRelativeToPiece (long x, long z, long piece, long *rx_out, lon
 /*	Description:	Calculate offsets from player's position (car's centre point)			*/
 /*	======================================================================================= */
 
-static void CalculateWheelXZOffsets (void)
-	{
+static void CalculateWheelXZOffsets(void)
+{
 	short *trig_coeffs = TrigCoefficients();
 
 	// rear wheel is just (0, 0, -CAR_LENGTH/2) split into components
-	rear_wheel_x_offset = ((long)trig_coeffs[Z_X_COMP] * (-CAR_LENGTH/2) * PC_FACTOR);
-	rear_wheel_z_offset = ((long)trig_coeffs[Z_Z_COMP] * (-CAR_LENGTH/2) * PC_FACTOR);
+	rear_wheel_x_offset = ((long) trig_coeffs[Z_X_COMP] * (-CAR_LENGTH / 2) * PC_FACTOR);
+	rear_wheel_z_offset = ((long) trig_coeffs[Z_Z_COMP] * (-CAR_LENGTH / 2) * PC_FACTOR);
 
 	// front left wheel is just (-CAR_WIDTH/2, 0, CAR_LENGTH/2) split into components
-	front_left_wheel_x_offset = ((long)trig_coeffs[X_X_COMP] * (-CAR_WIDTH/2) * PC_FACTOR);
-	front_left_wheel_x_offset += ((long)trig_coeffs[Z_X_COMP] * (CAR_LENGTH/2) * PC_FACTOR);
-	front_left_wheel_z_offset = ((long)trig_coeffs[X_Z_COMP] * (-CAR_WIDTH/2) * PC_FACTOR);
-	front_left_wheel_z_offset += ((long)trig_coeffs[Z_Z_COMP] * (CAR_LENGTH/2) * PC_FACTOR);
+	front_left_wheel_x_offset = ((long) trig_coeffs[X_X_COMP] * (-CAR_WIDTH / 2) * PC_FACTOR);
+	front_left_wheel_x_offset += ((long) trig_coeffs[Z_X_COMP] * (CAR_LENGTH / 2) * PC_FACTOR);
+	front_left_wheel_z_offset = ((long) trig_coeffs[X_Z_COMP] * (-CAR_WIDTH / 2) * PC_FACTOR);
+	front_left_wheel_z_offset += ((long) trig_coeffs[Z_Z_COMP] * (CAR_LENGTH / 2) * PC_FACTOR);
 
 	// front right wheel is just (CAR_WIDTH/2, 0, CAR_LENGTH/2) split into components
-	front_right_wheel_x_offset = ((long)trig_coeffs[X_X_COMP] * (CAR_WIDTH/2) * PC_FACTOR);
-	front_right_wheel_x_offset += ((long)trig_coeffs[Z_X_COMP] * (CAR_LENGTH/2) * PC_FACTOR);
-	front_right_wheel_z_offset = ((long)trig_coeffs[X_Z_COMP] * (CAR_WIDTH/2) * PC_FACTOR);
-	front_right_wheel_z_offset += ((long)trig_coeffs[Z_Z_COMP] * (CAR_LENGTH/2) * PC_FACTOR);
+	front_right_wheel_x_offset = ((long) trig_coeffs[X_X_COMP] * (CAR_WIDTH / 2) * PC_FACTOR);
+	front_right_wheel_x_offset += ((long) trig_coeffs[Z_X_COMP] * (CAR_LENGTH / 2) * PC_FACTOR);
+	front_right_wheel_z_offset = ((long) trig_coeffs[X_Z_COMP] * (CAR_WIDTH / 2) * PC_FACTOR);
+	front_right_wheel_z_offset += ((long) trig_coeffs[Z_Z_COMP] * (CAR_LENGTH / 2) * PC_FACTOR);
 
 	// could also possibly work out the wheel y offsets here
 	// rather than doing it in calculate.actual.wheel.heights
 	// but calculate.actual.wheel.heights doesn't use components
 	return;
-	}
+}
 
 #ifdef NOT_USED
-void TempCentrePoint (long *x, long *y, long *z)
-	{
+void TempCentrePoint(long *x, long *y, long *z)
+{
 	*x = player_x;
 	*y = player_y;
 	*z = player_z;
-	}
+}
 
-void TempRearPoint (long *x, long *y, long *z)
-	{
+void TempRearPoint(long *x, long *y, long *z)
+{
 	*x = player_x + rear_wheel_x_offset;
 	//*y = player_y;
 
 	*y = (((-rear_actual_height / 32) << LOG_PRECISION) * PC_FACTOR);
 	*z = player_z + rear_wheel_z_offset;
-	}
+}
 
-void TempFrontLeftPoint (long *x, long *y, long *z)
-	{
+void TempFrontLeftPoint(long *x, long *y, long *z)
+{
 	*x = player_x + front_left_wheel_x_offset;
 	//*y = player_y;
 
 	*y = (((-front_left_actual_height / 32) << LOG_PRECISION) * PC_FACTOR);
 	*z = player_z + front_left_wheel_z_offset;
-	}
+}
 
-void TempFrontRightPoint (long *x, long *y, long *z)
-	{
+void TempFrontRightPoint(long *x, long *y, long *z)
+{
 	*x = player_x + front_right_wheel_x_offset;
 	//*y = player_y;
 
 	*y = (((-front_right_actual_height / 32) << LOG_PRECISION) * PC_FACTOR);
 	*z = player_z + front_right_wheel_z_offset;
-	}
+}
 
 
-void StuntCarRearWheelXZ (long *x, long *z)
-	{
+void StuntCarRearWheelXZ(long *x, long *z)
+{
 	CalcYXZTrigCoefficients(player_x_angle,
-							player_y_angle,
-							player_z_angle);
+		player_y_angle,
+		player_z_angle);
 
 	CalculateWheelXZOffsets();
 
 	*x = rear_wheel_x_offset + player_x;
 	*z = rear_wheel_z_offset + player_z;
-	}
+}
 
-void StuntCarFrontLeftWheelXZ (long *x, long *z)
-	{
+void StuntCarFrontLeftWheelXZ(long *x, long *z)
+{
 	// must have previously called StuntCarRearWheelXZ
 
 	*x = front_left_wheel_x_offset + player_x;
 	*z = front_left_wheel_z_offset + player_z;
-	}
+}
 
-void StuntCarFrontRightWheelXZ (long *x, long *z)
-	{
+void StuntCarFrontRightWheelXZ(long *x, long *z)
+{
 	// must have previously called StuntCarRearWheelXZ
 
 	*x = front_right_wheel_x_offset + player_x;
 	*z = front_right_wheel_z_offset + player_z;
-	}
+}
 
 
-void StuntCarWheelXZ (long piece, long segment, long scrx, long scrz, long *x, long *z)
-	{
+void StuntCarWheelXZ(long piece, long segment, long scrx, long scrz, long *x, long *z)
+{
 	long x1, x2, x3, x4;
 	long z1, z2, z3, z4;
 	long sxa, sxb, sx;
 	long sza, szb, sz;
 
-	x1 = Track[piece].coords[(segment*4)].x;
-	z1 = Track[piece].coords[(segment*4)].z;
+	x1 = Track[piece].coords[(segment * 4)].x;
+	z1 = Track[piece].coords[(segment * 4)].z;
 
-	x2 = Track[piece].coords[(segment*4)+1].x;
-	z2 = Track[piece].coords[(segment*4)+1].z;
+	x2 = Track[piece].coords[(segment * 4) + 1].x;
+	z2 = Track[piece].coords[(segment * 4) + 1].z;
 
 	segment++;
-	x3 = Track[piece].coords[(segment*4)].x;
-	z3 = Track[piece].coords[(segment*4)].z;
+	x3 = Track[piece].coords[(segment * 4)].x;
+	z3 = Track[piece].coords[(segment * 4)].z;
 
-	x4 = Track[piece].coords[(segment*4)+1].x;
-	z4 = Track[piece].coords[(segment*4)+1].z;
+	x4 = Track[piece].coords[(segment * 4) + 1].x;
+	z4 = Track[piece].coords[(segment * 4) + 1].z;
 
 	// first do x interpolation
 	//fprintf(out, "x1 %d, x2 %d, x3 %d, x4 %d\n", x1, x2, x3, x4);
 	//fprintf(out, "scrx %d, scrz %d\n", scrx, scrz);
 
-	sxa = (x1<<LOG_SURFACE_SIZE) + (scrx * (x2-x1));
-	sxb = (x3<<LOG_SURFACE_SIZE) + (scrx * (x4-x3));
+	sxa = (x1 << LOG_SURFACE_SIZE) + (scrx * (x2 - x1));
+	sxb = (x3 << LOG_SURFACE_SIZE) + (scrx * (x4 - x3));
 
-	sza = (z1<<LOG_SURFACE_SIZE) + (scrx * (z2-z1));
-	szb = (z3<<LOG_SURFACE_SIZE) + (scrx * (z4-z3));
+	sza = (z1 << LOG_SURFACE_SIZE) + (scrx * (z2 - z1));
+	szb = (z3 << LOG_SURFACE_SIZE) + (scrx * (z4 - z3));
 
 	// now do z interpolation
-	sx = (sxa<<(LOG_PRECISION-LOG_SURFACE_SIZE)) + ((scrz * (sxb-sxa))>>((LOG_SURFACE_SIZE*2)-LOG_PRECISION));
+	sx = (sxa << (LOG_PRECISION - LOG_SURFACE_SIZE)) + ((scrz * (sxb - sxa)) >> ((LOG_SURFACE_SIZE * 2) - LOG_PRECISION));
 	//fprintf(out, "sx %d\n", sx);
 
-	sz = (sza<<(LOG_PRECISION-LOG_SURFACE_SIZE)) + ((scrz * (szb-sza))>>((LOG_SURFACE_SIZE*2)-LOG_PRECISION));
+	sz = (sza << (LOG_PRECISION - LOG_SURFACE_SIZE)) + ((scrz * (szb - sza)) >> ((LOG_SURFACE_SIZE * 2) - LOG_PRECISION));
 
 	// add x/z position of piece's front left corner, within world
 	*x = sx + (Track[piece].x << LOG_CUBE_SIZE);
 	*z = sz + (Track[piece].z << LOG_CUBE_SIZE);
-	}
+}
 #endif
 
 /*	======================================================================================= */
@@ -1209,19 +1209,19 @@ void StuntCarWheelXZ (long piece, long segment, long scrx, long scrz, long *x, l
 /*	======================================================================================= */
 
 typedef enum
-	{
+{
 	FRONT_LEFT = 0,
 	FRONT_RIGHT,
 	REAR,
 	NUM_WHEEL_POSITIONS,
 	CENTRE	// NOTE: This isn't a wheel position, but is used by CalculatePlayersRoadPosition
-	} WheelPositionType;
+} WheelPositionType;
 
 
 // VALUES FROM FOLLOWING ARE SLIGHTLY DIFFERENT TO AMIGA STUNT CAR RACER, BUT WORK OK
 
-static void CalculateRoadWheelHeights (void)
-	{
+static void CalculateRoadWheelHeights(void)
+{
 	long i, height;
 	COORD_3D wheel_pos[NUM_WHEEL_POSITIONS];
 
@@ -1244,29 +1244,29 @@ static void CalculateRoadWheelHeights (void)
 
 	// calculate world road height at wheel positions
 	for (i = 0; i < NUM_WHEEL_POSITIONS; i++)
-		{
+	{
 		CalculateWorldRoadHeight(i, wheel_pos[i].x, wheel_pos[i].z, &height);
 
 		// convert the result to PC StuntCarRacer magnitude
-		height = ((height / PC_FACTOR) >> (LOG_PRECISION-3));
+		height = ((height / PC_FACTOR) >> (LOG_PRECISION - 3));
 
 		CalculateRoadWheelHeight(height, &wheel_pos[i].y);
 
 		// 23/08/1998 - also store player_distance_off_road
 		if (i == REAR)
 			player_distance_off_road = abs(distance_off_road);
-		}
+	}
 
 	// store heights in global variables
 	front_left_road_height = wheel_pos[FRONT_LEFT].y;
 	front_right_road_height = wheel_pos[FRONT_RIGHT].y;
 	rear_road_height = wheel_pos[REAR].y;
 	return;
-	}
+}
 
 
-static void CalculateRoadWheelHeight (long height, long *height_out)
-	{
+static void CalculateRoadWheelHeight(long height, long *height_out)
+{
 	if (wheel_off_road)
 		CalculateIfCarOffRoad(&height);
 
@@ -1274,49 +1274,49 @@ static void CalculateRoadWheelHeight (long height, long *height_out)
 
 	// get angle in Amiga StuntCarRacer format (i.e. correct sign)
 	long angle = (player_x_angle < (_180_DEGREES) ? (player_x_angle) :
-													(player_x_angle - _360_DEGREES));
+		(player_x_angle - _360_DEGREES));
 
 	if ((abs(player_z_speed) >= 0xA00) || (abs(angle) >= 0x600))
-		{
+	{
 		// use height as is
 		*height_out = height;
-		}
+	}
 	else
-		{
+	{
 		// save the average of calculated (new) height and the previous value
 		// this is possibly for when the car is being lowered onto the road
 		*height_out = ((height + *height_out) / 2);
-		}
-
-	return;
 	}
 
+	return;
+}
 
-static void CalculateIfCarOffRoad (long *height)
-	{
+
+static void CalculateIfCarOffRoad(long *height)
+{
 	// calculate how far the current wheel is off the left or right of the road
 	long x = abs(distance_off_road);
 
-	if (x > ((3*CAR_WIDTH)/4))
-		{
+	if (x > ((3 * CAR_WIDTH) / 4))
+	{
 		// signal whole car is off road
 		*height = OFF_ROAD_HEIGHT;
 		at_side_byte = (at_side_byte >> 1) | 0x80;
-		}
+	}
 	else
-		{
+	{
 		// use the amount the wheel is off the road to drop the height of the wheel,
 		// to make the car fall off the edge gradually (i.e. invisible sloping sides)
 		*height -= ((x * 16) + 0x100);
 
 		if (*height < OFF_ROAD_HEIGHT)
-			{
+		{
 			// signal whole car is off road
 			*height = OFF_ROAD_HEIGHT;
 			at_side_byte = (at_side_byte >> 1) | 0x80;
-			}
+		}
 		else
-			{
+		{
 			// store which side the car is falling off
 
 			// logic here is different to Amiga StuntCarRacer, due to distance_off_road being different
@@ -1324,25 +1324,25 @@ static void CalculateIfCarOffRoad (long *height)
 			long w = distance_off_road >> 8;
 
 			if (w & 0x80)
-				{
+			{
 				if (off_left)
 					which_side_byte = 0x80;	// left
 				else if (off_right)
 					which_side_byte = 0x40;	// right
-				}
 			}
 		}
+	}
 
 	return;
-	}
+}
 
 
 // current surface co-ords
 static long sx1, sy1, sz1, sx2, sy2, sz2, sx3, sy3, sz3, sx4, sy4, sz4;
 
 
-static void CalculateWorldRoadHeight (long wheel, long x, long z, long *y_out)
-	{
+static void CalculateWorldRoadHeight(long wheel, long x, long z, long *y_out)
+{
 	// starts with the piece/surface that was used last time
 	// this avoids locating the wrong map square,
 	// e.g. for diagonal pieces that run into adjacent squares
@@ -1361,50 +1361,50 @@ static void CalculateWorldRoadHeight (long wheel, long x, long z, long *y_out)
 		prevTrackID = TrackID;
 	}
 
-//****************
+	//****************
 
 
 	// 14/05/1998 - first section has been re-written to allow the function to handle
 	// the case when the point has been off the road and then returned to an entirely
 	// different area of the road (e.g. car placed back onto track in different place)
 	long this_piece;
-	if (! GetPieceUsingMap(x, z, &this_piece))
-		{
+	if (!GetPieceUsingMap(x, z, &this_piece))
+	{
 #if defined(DEBUG) || defined(_DEBUG)
 		if (debug_position) fprintf(out, "CalculateWorldRoadHeight error\n");
 #endif
 		if (first_time)
-			{
+		{
 			// get the four (x,y,z) points for the first surface of the default piece
 			piece = 0;
 			segment = 0;
 			GetSurfaceCoords(piece, segment);
-			}
 		}
+	}
 	else
-		{
+	{
 #if defined(DEBUG) || defined(_DEBUG)
 		if (debug_position) fprintf(out, "piece %d, this_piece %d\n", piece, this_piece);
 #endif
 		if ((first_time) ||
 			(abs(this_piece - piece) > 1))	// moved by more than one piece
-			{
+		{
 			// check the move is not from the last to first piece, or vice versa
 			if ((!((this_piece == (NumTrackPieces - 1)) && (piece == 0))) &&
 				(!((this_piece == 0) && (piece == (NumTrackPieces - 1)))))
-				{
+			{
 				// get the four (x,y,z) points for the current surface of the piece
 				piece = this_piece;
 				segment = 0;
 				GetSurfaceCoords(piece, segment);
-				}
 			}
 		}
+	}
 
 	first_time = FALSE;		// ensure flag is cleared
 
 
-//****************
+	//****************
 
 
 	// find the surface that the point is located within
@@ -1416,17 +1416,17 @@ static void CalculateWorldRoadHeight (long wheel, long x, long z, long *y_out)
 	// 'before surface' loop
 	num_piece_changes = 0;
 	while (before_surface)
-		{
+	{
 		// really only need to do following when piece changes, but do it always at the moment
 		CalcXZRelativeToPiece(x, z, piece, &rx, &rz);
 
 #if defined(DEBUG) || defined(_DEBUG)
 		if (debug_position)
 		{
-		fprintf(out, "before_surface sx2, sy2, sz2: 0x%x, 0x%x, 0x%x\n", sx2, sy2, sz2);
-		fprintf(out, "before_surface sx3, sy3, sz3: 0x%x, 0x%x, 0x%x\n", sx3, sy3, sz3);
-		fprintf(out, "before_surface sx1, sy1, sz1: 0x%x, 0x%x, 0x%x\n", sx1, sy1, sz1);
-		fprintf(out, "before_surface sx4, sy4, sz4: 0x%x, 0x%x, 0x%x\n", sx4, sy4, sz4);
+			fprintf(out, "before_surface sx2, sy2, sz2: 0x%x, 0x%x, 0x%x\n", sx2, sy2, sz2);
+			fprintf(out, "before_surface sx3, sy3, sz3: 0x%x, 0x%x, 0x%x\n", sx3, sy3, sz3);
+			fprintf(out, "before_surface sx1, sy1, sz1: 0x%x, 0x%x, 0x%x\n", sx1, sy1, sz1);
+			fprintf(out, "before_surface sx4, sy4, sz4: 0x%x, 0x%x, 0x%x\n", sx4, sy4, sz4);
 		}
 #endif
 		// calculate top dot product => before_surface
@@ -1435,37 +1435,37 @@ static void CalculateWorldRoadHeight (long wheel, long x, long z, long *y_out)
 		before_surface = (((xs * zp) - (xp * zs)) < 0 ? TRUE : FALSE);
 
 		if (before_surface)
-			{
+		{
 			// future improvement: try a move in one direction,
 			// if this is worse then move in other direction
 
 			// DIRECTION DEPENDANT - WHOLE SECTION
 			if (segment < (Track[piece].numSegments - 1))
-				{
+			{
 				segment++;
-				}
+			}
 			else
-				{
+			{
 				// go to next piece if already at last surface
-				piece++; if (piece > (NumTrackPieces - 1)) piece = 0;
+				piece++; if (piece >(NumTrackPieces - 1)) piece = 0;
 				segment = 0;
 
 				num_piece_changes++;
-				}
+			}
 
 			// get the four (x,y,z) points for the new surface
 			GetSurfaceCoords(piece, segment);
-			}
+		}
 
 		// prevent an infinite loop
 		if (num_piece_changes >= NumTrackPieces)
-			{
+		{
 #if defined(DEBUG) || defined(_DEBUG)
 			fprintf(out, "CalculateWorldRoadHeight - infinite loop trapped (1)\n");
 #endif
 			break;
-			}
 		}
+	}
 
 #if defined(DEBUG) || defined(_DEBUG)
 	// warn if surface search was inefficient
@@ -1476,17 +1476,17 @@ static void CalculateWorldRoadHeight (long wheel, long x, long z, long *y_out)
 	// 'after surface' loop
 	num_piece_changes = 0;
 	while (after_surface)
-		{
+	{
 		// really only need to do following when piece changes, but do it always at the moment
 		CalcXZRelativeToPiece(x, z, piece, &rx, &rz);
 
 #if defined(DEBUG) || defined(_DEBUG)
 		if (debug_position)
 		{
-		fprintf(out, "after_surface sx2, sy2, sz2: 0x%x, 0x%x, 0x%x\n", sx2, sy2, sz2);
-		fprintf(out, "after_surface sx3, sy3, sz3: 0x%x, 0x%x, 0x%x\n", sx3, sy3, sz3);
-		fprintf(out, "after_surface sx1, sy1, sz1: 0x%x, 0x%x, 0x%x\n", sx1, sy1, sz1);
-		fprintf(out, "after_surface sx4, sy4, sz4: 0x%x, 0x%x, 0x%x\n", sx4, sy4, sz4);
+			fprintf(out, "after_surface sx2, sy2, sz2: 0x%x, 0x%x, 0x%x\n", sx2, sy2, sz2);
+			fprintf(out, "after_surface sx3, sy3, sz3: 0x%x, 0x%x, 0x%x\n", sx3, sy3, sz3);
+			fprintf(out, "after_surface sx1, sy1, sz1: 0x%x, 0x%x, 0x%x\n", sx1, sy1, sz1);
+			fprintf(out, "after_surface sx4, sy4, sz4: 0x%x, 0x%x, 0x%x\n", sx4, sy4, sz4);
 		}
 #endif
 		// calculate bottom dot product => after_surface
@@ -1495,37 +1495,37 @@ static void CalculateWorldRoadHeight (long wheel, long x, long z, long *y_out)
 		after_surface = (((xs * zp) - (xp * zs)) < 0 ? TRUE : FALSE);
 
 		if (after_surface)
-			{
+		{
 			// future improvement: try a move in one direction,
 			// if this is worse then move in other direction
 
 			// DIRECTION DEPENDANT - WHOLE SECTION
 			if (segment > 0)
-				{
+			{
 				segment--;
-				}
+			}
 			else
-				{
+			{
 				// go to previous piece if already at first surface
 				piece--; if (piece < 0) piece = (NumTrackPieces - 1);
 				segment = (Track[piece].numSegments - 1);
 
 				num_piece_changes++;
-				}
+			}
 
 			// get the four (x,y,z) points for the new surface
 			GetSurfaceCoords(piece, segment);
-			}
+		}
 
 		// prevent an infinite loop
 		if (num_piece_changes >= NumTrackPieces)
-			{
+		{
 #if defined(DEBUG) || defined(_DEBUG)
 			fprintf(out, "CalculateWorldRoadHeight - infinite loop trapped (2)\n");
 #endif
 			break;
-			}
 		}
+	}
 
 #if defined(DEBUG) || defined(_DEBUG)
 	// warn if surface search was inefficient
@@ -1533,7 +1533,7 @@ static void CalculateWorldRoadHeight (long wheel, long x, long z, long *y_out)
 		fprintf(out, "CalculateWorldRoadHeight - %d changes (2)\n", num_piece_changes);
 #endif
 
-//****************
+	//****************
 
 
 	// now know that point is between start edge and end edge of surface
@@ -1582,7 +1582,7 @@ static void CalculateWorldRoadHeight (long wheel, long x, long z, long *y_out)
 		}
 	}
 
-//****************
+	//****************
 
 
 	// calculate height of surface at x,z position using linear interpolation
@@ -1598,8 +1598,8 @@ static void CalculateWorldRoadHeight (long wheel, long x, long z, long *y_out)
 
 		if (wheel == REAR)
 		{
-		// Reduce sx to (0 - 255)
-		rear_wheel_surface_x_position = sx >> (LOG_SURFACE_SIZE-8);
+			// Reduce sx to (0 - 255)
+			rear_wheel_surface_x_position = sx >> (LOG_SURFACE_SIZE - 8);
 		}
 	}
 	else
@@ -1612,7 +1612,7 @@ static void CalculateWorldRoadHeight (long wheel, long x, long z, long *y_out)
 		player_current_piece = piece;
 		player_current_segment = calculated_segment;
 
-		players_distance_into_section = (calculated_segment * 256) + (sz >> (LOG_SURFACE_SIZE-8));
+		players_distance_into_section = (calculated_segment * 256) + (sz >> (LOG_SURFACE_SIZE - 8));
 		//VALUE1 = players_distance_into_section;
 		if (calculated_segment >= Track[piece].numSegments)
 		{
@@ -1630,11 +1630,11 @@ static void CalculateWorldRoadHeight (long wheel, long x, long z, long *y_out)
 	// 22/10/1998 - if the curve calculation output a different segment to the one that was identified
 	//				earlier then the co-ordinates must be retrieved for the calculated segment.
 	if (calculated_segment != segment)
-		{
+	{
 		segment = calculated_segment;
 		// get the four (x,y,z) points for the new surface
 		GetSurfaceCoords(piece, segment);
-		}
+	}
 
 	/*
 	CCPIECE = piece;
@@ -1651,30 +1651,30 @@ static void CalculateWorldRoadHeight (long wheel, long x, long z, long *y_out)
 #if defined(DEBUG) || defined(_DEBUG)
 	if (debug_position)
 	{
-	fprintf(out, "interpolate sx, sz: %d, %d\n", sx, sz);
-	fprintf(out, "interpolate sx2, sy2, sz2: 0x%x, 0x%x, 0x%x\n", sx2, sy2, sz2);
-	fprintf(out, "interpolate sx3, sy3, sz3: 0x%x, 0x%x, 0x%x\n", sx3, sy3, sz3);
-	fprintf(out, "interpolate sx1, sy1, sz1: 0x%x, 0x%x, 0x%x\n", sx1, sy1, sz1);
-	fprintf(out, "interpolate sx4, sy4, sz4: 0x%x, 0x%x, 0x%x\n", sx4, sy4, sz4);
+		fprintf(out, "interpolate sx, sz: %d, %d\n", sx, sz);
+		fprintf(out, "interpolate sx2, sy2, sz2: 0x%x, 0x%x, 0x%x\n", sx2, sy2, sz2);
+		fprintf(out, "interpolate sx3, sy3, sz3: 0x%x, 0x%x, 0x%x\n", sx3, sy3, sz3);
+		fprintf(out, "interpolate sx1, sy1, sz1: 0x%x, 0x%x, 0x%x\n", sx1, sy1, sz1);
+		fprintf(out, "interpolate sx4, sy4, sz4: 0x%x, 0x%x, 0x%x\n", sx4, sy4, sz4);
 	}
 #endif
 
 	// first do x interpolation
-	sya = sy1 + ((sx * (sy4-sy1)) >> LOG_SURFACE_SIZE);
-	syb = sy2 + ((sx * (sy3-sy2)) >> LOG_SURFACE_SIZE);
+	sya = sy1 + ((sx * (sy4 - sy1)) >> LOG_SURFACE_SIZE);
+	syb = sy2 + ((sx * (sy3 - sy2)) >> LOG_SURFACE_SIZE);
 
 	// now do z interpolation
-	y = (syb << LOG_SURFACE_SIZE) + (sz * (sya-syb));
+	y = (syb << LOG_SURFACE_SIZE) + (sz * (sya - syb));
 
 	// 02/08/1998 - maybe should not do the following - just leave value as is
 	//			  - don't need to make the value any bigger
-	*y_out = (y << (LOG_PRECISION-LOG_SURFACE_SIZE));
+	*y_out = (y << (LOG_PRECISION - LOG_SURFACE_SIZE));
 	return;
-	}
+}
 
 
-static void GetSurfaceCoords (long piece, long segment)
-	{
+static void GetSurfaceCoords(long piece, long segment)
+{
 	if ((segment < 0) || (segment >= Track[piece].numSegments))
 	{
 		MessageBox(NULL, L"GetSurfaceCoords segment out of range", L"Error", MB_OK);
@@ -1686,44 +1686,44 @@ static void GetSurfaceCoords (long piece, long segment)
 	if (debug_position) fprintf(out, "GetSurfaceCoords piece %d, segment %d, numSegments %d\n", piece, segment, Track[piece].numSegments);
 #endif
 
-	sx2 = Track[piece].coords[(segment*4)].x;
-	sy2 = Track[piece].coords[(segment*4)].y;
-	sz2 = Track[piece].coords[(segment*4)].z;
+	sx2 = Track[piece].coords[(segment * 4)].x;
+	sy2 = Track[piece].coords[(segment * 4)].y;
+	sz2 = Track[piece].coords[(segment * 4)].z;
 #if defined(DEBUG) || defined(_DEBUG)
 	if (debug_position) fprintf(out, "GetSurfaceCoords sx2, sy2, sz2: 0x%x, 0x%x, 0x%x\n", sx2, sy2, sz2);
 #endif
 
-	sx3 = Track[piece].coords[(segment*4)+1].x;
-	sy3 = Track[piece].coords[(segment*4)+1].y;
-	sz3 = Track[piece].coords[(segment*4)+1].z;
+	sx3 = Track[piece].coords[(segment * 4) + 1].x;
+	sy3 = Track[piece].coords[(segment * 4) + 1].y;
+	sz3 = Track[piece].coords[(segment * 4) + 1].z;
 #if defined(DEBUG) || defined(_DEBUG)
 	if (debug_position) fprintf(out, "GetSurfaceCoords sx3, sy3, sz3: 0x%x, 0x%x, 0x%x\n", sx3, sy3, sz3);
 #endif
 
 	segment++;
-	sx1 = Track[piece].coords[(segment*4)].x;
-	sy1 = Track[piece].coords[(segment*4)].y;
-	sz1 = Track[piece].coords[(segment*4)].z;
+	sx1 = Track[piece].coords[(segment * 4)].x;
+	sy1 = Track[piece].coords[(segment * 4)].y;
+	sz1 = Track[piece].coords[(segment * 4)].z;
 #if defined(DEBUG) || defined(_DEBUG)
 	if (debug_position) fprintf(out, "GetSurfaceCoords sx1, sy1, sz1: 0x%x, 0x%x, 0x%x\n", sx1, sy1, sz1);
 #endif
 
-	sx4 = Track[piece].coords[(segment*4)+1].x;
-	sy4 = Track[piece].coords[(segment*4)+1].y;
-	sz4 = Track[piece].coords[(segment*4)+1].z;
+	sx4 = Track[piece].coords[(segment * 4) + 1].x;
+	sy4 = Track[piece].coords[(segment * 4) + 1].y;
+	sz4 = Track[piece].coords[(segment * 4) + 1].z;
 #if defined(DEBUG) || defined(_DEBUG)
 	if (debug_position) fprintf(out, "GetSurfaceCoords sx4, sy4, sz4: 0x%x, 0x%x, 0x%x\n", sx4, sy4, sz4);
 #endif
 	return;
-	}
+}
 
 
-static long CalcDistanceOffRoad (long x, long z,
-								 long ox, long oz,
-								 long ux, long uz,
-								 long vx, long vz,
-								 long *ex, long *ez)
-	{
+static long CalcDistanceOffRoad(long x, long z,
+	long ox, long oz,
+	long ux, long uz,
+	long vx, long vz,
+	long *ex, long *ez)
+{
 	// ox, oz - origin point
 
 	// z vector
@@ -1738,7 +1738,7 @@ static long CalcDistanceOffRoad (long x, long z,
 	// method is similar to that used when texture mapping
 	long v, denominator, distance;
 
-	v = (((x-ox) * uz) + ((oz-z) * ux));	// needs to be divided by denominator
+	v = (((x - ox) * uz) + ((oz - z) * ux));	// needs to be divided by denominator
 	denominator = ((uz * vx) - (ux * vz));
 	// do divide afterwards to avoid need for floating point calculation
 	if (denominator == 0)
@@ -1760,20 +1760,20 @@ static long CalcDistanceOffRoad (long x, long z,
 	}
 
 	return(distance);
-	}
+}
 
 
-static void CalcSurfacePosition (long piece,
-								 long x, long z,
-								 long ox, long oz,
-								 long ux, long uz,
-								 long vx, long vz,
-								 long *sx, long *sz,
-								 long *road_x,
-								 long *segment_out)		// only updated by the calculation for curves
-	{
+static void CalcSurfacePosition(long piece,
+	long x, long z,
+	long ox, long oz,
+	long ux, long uz,
+	long vx, long vz,
+	long *sx, long *sz,
+	long *road_x,
+	long *segment_out)		// only updated by the calculation for curves
+{
 	if (Track[piece].type & 0x80)	// curve
-		{
+	{
 		long piece_y_angle, radius;
 		long surface_x, numSegments, piece_z;
 		double distance_from_centre, d;
@@ -1786,38 +1786,38 @@ static void CalcSurfacePosition (long piece,
 
 		// adjust for normal direction of travel
 		if (Track[piece].oppositeDirection)
-			piece_y_angle = (MAX_ANGLE/8) - piece_y_angle;
+			piece_y_angle = (MAX_ANGLE / 8) - piece_y_angle;
 
 		// limit piece_y_angle to valid range
 		if (piece_y_angle < 0) piece_y_angle = 0;
-		if (piece_y_angle >= (MAX_ANGLE/8)) piece_y_angle = (MAX_ANGLE/8)-1;
+		if (piece_y_angle >= (MAX_ANGLE / 8)) piece_y_angle = (MAX_ANGLE / 8) - 1;
 
 
 		// calculate surface x position
-		if (distance_from_centre < (double)radius)
-			d = (double)radius - distance_from_centre;
+		if (distance_from_centre < (double) radius)
+			d = (double) radius - distance_from_centre;
 		else
-			d = distance_from_centre - (double)radius;
+			d = distance_from_centre - (double) radius;
 
-		surface_x = ((long)((d * SURFACE_SIZE) / (ROAD_WIDTH * PC_FACTOR)));
+		surface_x = ((long) ((d * SURFACE_SIZE) / (ROAD_WIDTH * PC_FACTOR)));
 		// Also calculate road_x if required (it has a different range to surface_x)
 		if (road_x)
-			*road_x = ((long)(d / PC_FACTOR));
+			*road_x = ((long) (d / PC_FACTOR));
 
-		if (surface_x >= SURFACE_SIZE) surface_x = SURFACE_SIZE-1;
+		if (surface_x >= SURFACE_SIZE) surface_x = SURFACE_SIZE - 1;
 		*sx = surface_x;
 
 
 		// calculate surface z position and output calculated segment
 		numSegments = Track[piece].numSegments;
-		piece_z = (((piece_y_angle << LOG_SURFACE_SIZE) * numSegments) / (MAX_ANGLE/8));
+		piece_z = (((piece_y_angle << LOG_SURFACE_SIZE) * numSegments) / (MAX_ANGLE / 8));
 
-		*sz = piece_z & (SURFACE_SIZE-1);
+		*sz = piece_z & (SURFACE_SIZE - 1);
 		*segment_out = piece_z >> LOG_SURFACE_SIZE;
 		return;
-		}
+	}
 	else
-		{
+	{
 		// straight or diagonal straight
 
 		// 22/10/1998 - NOTE: This method is no longer used for curved pieces because it is only
@@ -1839,7 +1839,7 @@ static void CalcSurfacePosition (long piece,
 		long u, v, denominator;
 
 		// left edge - calculate surface x position
-		v = (((x-ox) * uz) + ((oz-z) * ux));	// needs to be divided by denominator
+		v = (((x - ox) * uz) + ((oz - z) * ux));	// needs to be divided by denominator
 		denominator = ((uz * vx) - (ux * vz));
 		// do divide afterwards to avoid need for floating point calculation
 		if (denominator == 0)
@@ -1858,18 +1858,18 @@ static void CalcSurfacePosition (long piece,
 
 		// 07/01/1999
 		if (*sx >= SURFACE_SIZE)
-			{
+		{
 			//fprintf(out, "sx overflow trapped\n");
-			*sx = SURFACE_SIZE-1;
-			}
+			*sx = SURFACE_SIZE - 1;
+		}
 		if (*sx < 0)
-			{
+		{
 			//fprintf(out, "sx underflow trapped\n");
 			*sx = 0;
-			}
+		}
 
 		// top edge - calculate surface z position
-		u = (((x-ox) * vz) + ((oz-z) * vx));	// needs to be divided by denominator
+		u = (((x - ox) * vz) + ((oz - z) * vx));	// needs to be divided by denominator
 		denominator = ((ux * vz) - (uz * vx));
 		// do divide afterwards to avoid need for floating point calculation
 		if (denominator == 0)
@@ -1879,18 +1879,18 @@ static void CalcSurfacePosition (long piece,
 
 		// 07/01/1999
 		if (*sz >= SURFACE_SIZE)
-			{
+		{
 			//fprintf(out, "sz overflow trapped\n");
-			*sz = SURFACE_SIZE-1;
-			}
+			*sz = SURFACE_SIZE - 1;
+		}
 		if (*sz < 0)
-			{
+		{
 			//fprintf(out, "sz underflow trapped\n");
 			*sz = 0;
-			}
-		return;
 		}
+		return;
 	}
+}
 
 
 /*	======================================================================================= */
@@ -1899,8 +1899,8 @@ static void CalcSurfacePosition (long piece,
 /*	Description:	Calculate the height (y value) of each car wheel						*/
 /*	======================================================================================= */
 
-static void CalculateActualWheelHeights (void)
-	{
+static void CalculateActualWheelHeights(void)
+{
 	short sin_x, cos_x;
 	short sin_z, cos_z;
 
@@ -1913,24 +1913,24 @@ static void CalculateActualWheelHeights (void)
 
 	rear_actual_height = player_y;
 	// 29/06/1998 - sign changed on next line
-	rear_actual_height -= ((long)sin_x << (4+15-LOG_PRECISION));
+	rear_actual_height -= ((long) sin_x << (4 + 15 - LOG_PRECISION));
 	rear_actual_height >>= 8;
 
 	front_right_actual_height = player_y;
 	// 29/06/1998 - sign changed on next line
-	front_right_actual_height += ((long)sin_x << (4+15-LOG_PRECISION));
+	front_right_actual_height += ((long) sin_x << (4 + 15 - LOG_PRECISION));
 	// 29/06/1998 - sign changed on next line
-	front_right_actual_height -= ((long)sin_z << (3+15-LOG_PRECISION));
+	front_right_actual_height -= ((long) sin_z << (3 + 15 - LOG_PRECISION));
 	front_right_actual_height >>= 8;
 
 	front_left_actual_height = player_y;
 	// 29/06/1998 - sign changed on next line
-	front_left_actual_height += ((long)sin_x << (4+15-LOG_PRECISION));
+	front_left_actual_height += ((long) sin_x << (4 + 15 - LOG_PRECISION));
 	// 29/06/1998 - sign changed on next line
-	front_left_actual_height += ((long)sin_z << (3+15-LOG_PRECISION));
+	front_left_actual_height += ((long) sin_z << (3 + 15 - LOG_PRECISION));
 	front_left_actual_height >>= 8;
 	return;
-	}
+}
 
 
 /*	======================================================================================= */
@@ -1939,28 +1939,28 @@ static void CalculateActualWheelHeights (void)
 /*	Description:	Calculates player's actual X/Z speeds by rotating world speed values	*/
 /*	======================================================================================= */
 
-static void CalculateXZSpeeds (void)
+static void CalculateXZSpeeds(void)
 {
 	short *trig_coeffs = TrigCoefficients();
 
 	// this function basically does the same as RotateCoordinate,
 	// then removes the precision from the resulting values
 
-	player_x_speed =  ((player_world_x_speed * (long)trig_coeffs[X_X_COMP]) >> LOG_PRECISION);
-	player_x_speed += ((player_world_y_speed * (long)trig_coeffs[X_Y_COMP]) >> LOG_PRECISION);
-	player_x_speed += ((player_world_z_speed * (long)trig_coeffs[X_Z_COMP]) >> LOG_PRECISION);
+	player_x_speed = ((player_world_x_speed * (long) trig_coeffs[X_X_COMP]) >> LOG_PRECISION);
+	player_x_speed += ((player_world_y_speed * (long) trig_coeffs[X_Y_COMP]) >> LOG_PRECISION);
+	player_x_speed += ((player_world_z_speed * (long) trig_coeffs[X_Z_COMP]) >> LOG_PRECISION);
 
 	player_y_speed = 0;	// zero for current implementation
 
-// player's Y speed not used but would be calculated as :-
-//
-//	player_y_speed =  ((player_world_x_speed * (long)trig_coeffs[Y_X_COMP]) >> LOG_PRECISION);
-//	player_y_speed += ((player_world_y_speed * (long)trig_coeffs[Y_Y_COMP]) >> LOG_PRECISION);
-//	player_y_speed += ((player_world_z_speed * (long)trig_coeffs[Y_Z_COMP]) >> LOG_PRECISION);
+	// player's Y speed not used but would be calculated as :-
+	//
+	//	player_y_speed =  ((player_world_x_speed * (long)trig_coeffs[Y_X_COMP]) >> LOG_PRECISION);
+	//	player_y_speed += ((player_world_y_speed * (long)trig_coeffs[Y_Y_COMP]) >> LOG_PRECISION);
+	//	player_y_speed += ((player_world_z_speed * (long)trig_coeffs[Y_Z_COMP]) >> LOG_PRECISION);
 
-	player_z_speed =  ((player_world_x_speed * (long)trig_coeffs[Z_X_COMP]) >> LOG_PRECISION);
-	player_z_speed += ((player_world_y_speed * (long)trig_coeffs[Z_Y_COMP]) >> LOG_PRECISION);
-	player_z_speed += ((player_world_z_speed * (long)trig_coeffs[Z_Z_COMP]) >> LOG_PRECISION);
+	player_z_speed = ((player_world_x_speed * (long) trig_coeffs[Z_X_COMP]) >> LOG_PRECISION);
+	player_z_speed += ((player_world_y_speed * (long) trig_coeffs[Z_Y_COMP]) >> LOG_PRECISION);
+	player_z_speed += ((player_world_z_speed * (long) trig_coeffs[Z_Z_COMP]) >> LOG_PRECISION);
 	return;
 }
 
@@ -1976,28 +1976,28 @@ set.wheel.rotation.speed :-
 
 // pos.players.z.speed not stored by this function - use abs(players.z.speed) instead
 
-	if (touching.road == 0)
-		{
-		// Not touching road, so reduce wheel speed by one quarter
-		reduction = wheel.rotation.speed / 4;
-		wheel.rotation.speed - reduction;
-		return;
-		}
+if (touching.road == 0)
+{
+// Not touching road, so reduce wheel speed by one quarter
+reduction = wheel.rotation.speed / 4;
+wheel.rotation.speed - reduction;
+return;
+}
 
-	// touching road
-	if (abs(players.z.speed) < 0x800)
-		{
-		// multiply by 8 and use as wheel speed
-		wheel.rotation.speed = abs(players.z.speed) * 8;
-		}
-	else
-		{
-		// double it, add $3000 and use as wheel speed
-		wheel.rotation.speed = (abs(players.z.speed) * 2) + 0x3000;
-		if (wheel.rotation.speed > 0xffff)
-			wheel.rotation.speed = 0xff00;		// set to maximum value
-		}
-	return;
+// touching road
+if (abs(players.z.speed) < 0x800)
+{
+// multiply by 8 and use as wheel speed
+wheel.rotation.speed = abs(players.z.speed) * 8;
+}
+else
+{
+// double it, add $3000 and use as wheel speed
+wheel.rotation.speed = (abs(players.z.speed) * 2) + 0x3000;
+if (wheel.rotation.speed > 0xffff)
+wheel.rotation.speed = 0xff00;		// set to maximum value
+}
+return;
 */
 
 
@@ -2007,8 +2007,8 @@ set.wheel.rotation.speed :-
 /*	Description:	Calculate car acceleration due to gravity								*/
 /*	======================================================================================= */
 
-static void CalculateGravityAcceleration (void)
-	{
+static void CalculateGravityAcceleration(void)
+{
 	short *trig_coeffs = TrigCoefficients();
 
 	// Gravity acts on the Y axis only.  Therefore only Y components are used
@@ -2016,15 +2016,15 @@ static void CalculateGravityAcceleration (void)
 
 	// Acceleration along car's X axis
 	gravity_x_acceleration = ((-GRAVITY_ACCELERATION *
-											(long)trig_coeffs[X_Y_COMP]) >> LOG_PRECISION);
+		(long) trig_coeffs[X_Y_COMP]) >> LOG_PRECISION);
 
 	// Acceleration along car's Y axis
 	gravity_y_acceleration = ((-GRAVITY_ACCELERATION *
-											(long)trig_coeffs[Y_Y_COMP]) >> LOG_PRECISION);
+		(long) trig_coeffs[Y_Y_COMP]) >> LOG_PRECISION);
 
 	// Acceleration along car's Z axis
 	gravity_z_acceleration = ((-GRAVITY_ACCELERATION *
-											(long)trig_coeffs[Z_Y_COMP]) >> LOG_PRECISION);
+		(long) trig_coeffs[Z_Y_COMP]) >> LOG_PRECISION);
 
 #ifdef	HIGHER_FRAME_RATE
 	// 08/11/1998 - allow four times the frame rate by dividing accelerations by four
@@ -2036,7 +2036,7 @@ static void CalculateGravityAcceleration (void)
 	gravity_z_acceleration >>= 1;
 #endif
 	return;
-	}
+}
 
 
 /*	======================================================================================= */
@@ -2047,27 +2047,27 @@ static void CalculateGravityAcceleration (void)
 
 static long damaged_limit = 10;	// Actually track/league dependant (could add to track data)
 
-	// NOTE: road_cushion_value is 0 for standard league and 1 for super league
-	//		 fourteen_frames_elapsed has value of 0 or -1 (set)
+// NOTE: road_cushion_value is 0 for standard league and 1 for super league
+//		 fourteen_frames_elapsed has value of 0 or -1 (set)
 static long road_cushion_value = 0, fourteen_frames_elapsed = 0;
 
 
 // following are only global due to use by two functions - could be passed in instead
 static long front_left_height_difference,
-			front_right_height_difference,
-			rear_height_difference;
+front_right_height_difference,
+rear_height_difference;
 
 static long front_difference_below_road,
-			overall_difference_below_road;
+overall_difference_below_road;
 
 
-static void CarCollisionDetection (void)
-	{
+static void CarCollisionDetection(void)
+{
 	// local variables
 	long difference;
 
 	long average_front_amount_below_road,
-		 average_amount_below_road;
+		average_amount_below_road;
 
 
 	grounded_count = 0;
@@ -2076,30 +2076,30 @@ static void CarCollisionDetection (void)
 
 	// Front left wheel collision
 	CalculateWheelCollision(front_left_road_height,
-							front_left_actual_height,
-							&front_left_height_difference,
-							&old_front_left_difference,
-							&front_left_amount_below_road,
-							&front_left_damage);
+		front_left_actual_height,
+		&front_left_height_difference,
+		&old_front_left_difference,
+		&front_left_amount_below_road,
+		&front_left_damage);
 
 	// Front right wheel collision
 	CalculateWheelCollision(front_right_road_height,
-							front_right_actual_height,
-							&front_right_height_difference,
-							&old_front_right_difference,
-							&front_right_amount_below_road,
-							&front_right_damage);
+		front_right_actual_height,
+		&front_right_height_difference,
+		&old_front_right_difference,
+		&front_right_amount_below_road,
+		&front_right_damage);
 
 	// Rear wheel collision
 	CalculateWheelCollision(rear_road_height,
-							rear_actual_height,
-							&rear_height_difference,
-							&old_rear_difference,
-							&rear_amount_below_road,
-							&rear_damage);
+		rear_actual_height,
+		&rear_height_difference,
+		&old_rear_difference,
+		&rear_amount_below_road,
+		&rear_damage);
 
 
-//****************************************
+	//****************************************
 
 	average_front_amount_below_road = (front_left_amount_below_road + front_right_amount_below_road) >> 1;
 	average_amount_below_road = (average_front_amount_below_road + rear_amount_below_road) >> 1;
@@ -2113,26 +2113,26 @@ static void CarCollisionDetection (void)
 	if (difference < -0x1000) difference = -0x1000;
 	front_difference_below_road = difference;
 
-//****************************************
+	//****************************************
 
 	difference = average_front_amount_below_road - rear_amount_below_road;
 	overall_difference_below_road = difference;
 
 
-//****************************************
+	//****************************************
 
 	touching_road = (average_amount_below_road != 0 ? TRUE : FALSE);
 
-	if ((! touching_road) && (! on_chains))
-		{
+	if ((!touching_road) && (!on_chains))
+	{
 		// get angle in Amiga StuntCarRacer format (i.e. correct sign)
 		long angle = (player_x_angle < (_180_DEGREES) ? (player_x_angle) :
-														(player_x_angle - _360_DEGREES));
+			(player_x_angle - _360_DEGREES));
 
 		if (((angle < 0) && ((TrackID == ROLLER_COASTER) || (TrackID == SKI_JUMP)))
 			||
 			(angle >= 0))
-			{
+		{
 			difference = -128;
 
 			// check roller coaster - don't need to do anything
@@ -2146,8 +2146,8 @@ static void CarCollisionDetection (void)
 			difference -= overall_difference_below_road;
 			if ((difference < 0) && (player_x_rotation_speed >= -256))
 				overall_difference_below_road = difference;
-			}
 		}
+	}
 
 
 	// following function won't do anything at first
@@ -2157,9 +2157,9 @@ static void CarCollisionDetection (void)
 
 	CarToCarCollision();
 
-//****************************************
+	//****************************************
 
-//******** Play grounded sound if necessary ********
+	//******** Play grounded sound if necessary ********
 
 	if (grounded_delay > 0) --grounded_delay;
 
@@ -2174,23 +2174,23 @@ static void CarCollisionDetection (void)
 	GroundedSoundBuffer->SetVolume(AmigaVolumeToDirectX(amiga_volume));
 
 	if (grounded_delay == 0)
-		{
+	{
 		//GroundedSoundBuffer->SetCurrentPosition(0);
-		GroundedSoundBuffer->Play(NULL,NULL,NULL);	// not looping
+		GroundedSoundBuffer->Play(NULL, NULL, NULL);	// not looping
 		grounded_delay = 5;
-		}
-
-	return;
 	}
 
+	return;
+}
 
-static void CalculateWheelCollision (long road_height,
-									 long actual_height,
-									 long *height_difference_out,
-									 long *old_difference_in_out,
-									 long *amount_below_road_in_out,
-									 long *damage_in_out)
-	{
+
+static void CalculateWheelCollision(long road_height,
+	long actual_height,
+	long *height_difference_out,
+	long *old_difference_in_out,
+	long *amount_below_road_in_out,
+	long *damage_in_out)
+{
 	long new_difference;
 	long amount_below_road, old_amount_below_road;
 	long damage;
@@ -2209,7 +2209,7 @@ static void CalculateWheelCollision (long road_height,
 	amount_below_road = ((amount_below_road * INCREASE) >> 8) + new_difference;
 
 	if (amount_below_road >= 0)
-		{
+	{
 		old_amount_below_road = *amount_below_road_in_out;
 		*amount_below_road_in_out = amount_below_road;
 
@@ -2218,16 +2218,16 @@ static void CalculateWheelCollision (long road_height,
 
 		damage = *amount_below_road_in_out - (road_cushion_value * 256);
 		if (damage >= 0x700)
-			{
+		{
 			if (damage > damage_value)
 				damage_value = damage;
 
 			damage -= 0x600;
 			if (fourteen_frames_elapsed == 0)
-				{
+			{
 				damaged_count++;
 				if (damaged_count < damaged_limit)
-					{
+				{
 					damage /= 256;
 					// NOTE next line may be unnecessary
 					damage &= 0xff;
@@ -2236,26 +2236,26 @@ static void CalculateWheelCollision (long road_height,
 					if (damage > 0xff) damage = 0xff;
 					*damage_in_out = damage;
 					damaged = 0x80;
-					}
 				}
+			}
 			if (*amount_below_road_in_out >= 0x1200)
 				*amount_below_road_in_out = 0x11ff;
-			}
+		}
 		else
 			damaged_count = 0;
-		}
+	}
 	else
-		{
+	{
 		*amount_below_road_in_out = 0;
 		damaged_count = 0;
-		}
-
-	*old_difference_in_out = new_difference;
 	}
 
+	*old_difference_in_out = new_difference;
+}
 
-static void CalculateCarCollisionAcceleration (long average_amount_below_road)
-	{
+
+static void CalculateCarCollisionAcceleration(long average_amount_below_road)
+{
 	// 21/05/1998 - changed to use shifts rather than divides, to match Amiga StuntCarRacer exactly
 
 	// average_amount_below_road is the force exerted by the road on the car.
@@ -2282,23 +2282,23 @@ static void CalculateCarCollisionAcceleration (long average_amount_below_road)
 
 	// Calculate x_inclination_to_road
 	front_height_difference = (front_left_height_difference +
-							   front_right_height_difference) >> 1;
+		front_right_height_difference) >> 1;
 	x_inclination_to_road = (front_height_difference -
-							 rear_height_difference) >> log_car_length_factor;
+		rear_height_difference) >> log_car_length_factor;
 
 	// Calculate sin and cos of X angle between car and road surface
 	CalculateInclinationSinCos(x_inclination_to_road,
-							   &surface_sinx,
-							   &surface_cosx);
+		&surface_sinx,
+		&surface_cosx);
 
 	// Calculate z_inclination_to_road
 	z_inclination_to_road = (front_left_height_difference -
-							 front_right_height_difference) >> log_car_width_factor;
+		front_right_height_difference) >> log_car_width_factor;
 
 	// Calculate sin and cos of Z angle between car and road surface
 	CalculateInclinationSinCos(z_inclination_to_road,
-							   &surface_sinz,
-							   &surface_cosz);
+		&surface_sinz,
+		&surface_cosz);
 
 	surface_cosx_cosz = (surface_cosx * surface_cosz) >> 8;
 	surface_cosx_sinz = (surface_cosx * surface_sinz) >> 8;
@@ -2341,10 +2341,10 @@ static void CalculateCarCollisionAcceleration (long average_amount_below_road)
 	car_collision_z_acceleration >>= 1;
 #endif
 	return;
-	}
+}
 
 
-static long Cosine_Conversion_Table[] =
+static long Cosine_Conversion_Table [] =
 
 // Used to convert a sin value from (0*256 - 1*256) into a cosine value.
 //
@@ -2359,29 +2359,29 @@ static long Cosine_Conversion_Table[] =
 
 // NOTE: They can be changed to 256 at some point, to see what happens, because they are now longs
 {
-	0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
-	0xff,0xff,0xff,0xff,0xff,0xff,0xfe,0xfe,
-	0xfe,0xfe,0xfd,0xfd,0xfd,0xfd,0xfc,0xfc,
-	0xfb,0xfb,0xfb,0xfa,0xfa,0xf9,0xf9,0xf8,
-	0xf8,0xf7,0xf7,0xf6,0xf6,0xf5,0xf4,0xf4,
-	0xf3,0xf3,0xf2,0xf1,0xf0,0xf0,0xef,0xee,
-	0xed,0xec,0xec,0xeb,0xea,0xe9,0xe8,0xe7,
-	0xe6,0xe5,0xe4,0xe3,0xe2,0xe1,0xe0,0xdf,
-	0xde,0xdd,0xdb,0xda,0xd9,0xd8,0xd6,0xd5,
-	0xd4,0xd2,0xd1,0xcf,0xce,0xcc,0xcb,0xc9,
-	0xc8,0xc6,0xc5,0xc3,0xc1,0xbf,0xbe,0xbc,
-	0xba,0xb8,0xb6,0xb4,0xb2,0xb0,0xae,0xac,
-	0xa9,0xa7,0xa5,0xa2,0xa0,0x9d,0x9b,0x98,
-	0x95,0x92,0x8f,0x8c,0x89,0x86,0x83,0x7f,
-	0x7c,0x78,0x74,0x70,0x6c,0x68,0x63,0x5e,
-	0x59,0x53,0x4d,0x47,0x3f,0x37,0x2d,0x20
+	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe, 0xfe,
+	0xfe, 0xfe, 0xfd, 0xfd, 0xfd, 0xfd, 0xfc, 0xfc,
+	0xfb, 0xfb, 0xfb, 0xfa, 0xfa, 0xf9, 0xf9, 0xf8,
+	0xf8, 0xf7, 0xf7, 0xf6, 0xf6, 0xf5, 0xf4, 0xf4,
+	0xf3, 0xf3, 0xf2, 0xf1, 0xf0, 0xf0, 0xef, 0xee,
+	0xed, 0xec, 0xec, 0xeb, 0xea, 0xe9, 0xe8, 0xe7,
+	0xe6, 0xe5, 0xe4, 0xe3, 0xe2, 0xe1, 0xe0, 0xdf,
+	0xde, 0xdd, 0xdb, 0xda, 0xd9, 0xd8, 0xd6, 0xd5,
+	0xd4, 0xd2, 0xd1, 0xcf, 0xce, 0xcc, 0xcb, 0xc9,
+	0xc8, 0xc6, 0xc5, 0xc3, 0xc1, 0xbf, 0xbe, 0xbc,
+	0xba, 0xb8, 0xb6, 0xb4, 0xb2, 0xb0, 0xae, 0xac,
+	0xa9, 0xa7, 0xa5, 0xa2, 0xa0, 0x9d, 0x9b, 0x98,
+	0x95, 0x92, 0x8f, 0x8c, 0x89, 0x86, 0x83, 0x7f,
+	0x7c, 0x78, 0x74, 0x70, 0x6c, 0x68, 0x63, 0x5e,
+	0x59, 0x53, 0x4d, 0x47, 0x3f, 0x37, 0x2d, 0x20
 };
 
 
-static void CalculateInclinationSinCos (long inclination_in,
-										long *inclination_sin_out,
-										long *inclination_cos_out)
-	{
+static void CalculateInclinationSinCos(long inclination_in,
+	long *inclination_sin_out,
+	long *inclination_cos_out)
+{
 	// inclination_in is effectively the sin of the inclination angle
 
 	// but it currently has the sign removed and is limited to 255 to enable indexing
@@ -2400,15 +2400,15 @@ static void CalculateInclinationSinCos (long inclination_in,
 		*inclination_sin_out = 255;
 
 	// note only 128 values in table
-	*inclination_cos_out = Cosine_Conversion_Table[(*inclination_sin_out)/2];
+	*inclination_cos_out = Cosine_Conversion_Table[(*inclination_sin_out) / 2];
 	return;
-	}
+}
 
 
-static void LiftCarOntoTrack (void)
-	{
+static void LiftCarOntoTrack(void)
+{
 	return;
-	}
+}
 
 
 /*	======================================================================================= */
@@ -2417,17 +2417,17 @@ static void LiftCarOntoTrack (void)
 /*	Description:				*/
 /*	======================================================================================= */
 
-static void CalculateTotalAcceleration (void)
-	{
+static void CalculateTotalAcceleration(void)
+{
 	long reduction, twice_y;
 
 	player_y_acceleration = gravity_y_acceleration +
-							car_collision_y_acceleration;
+		car_collision_y_acceleration;
 
 #ifdef	HIGHER_FRAME_RATE
 	// 08/11/1998 - allow four times the frame rate by dividing accelerations by four
-//	engine_z_acceleration++;		// 10/12/1998
-//	engine_z_acceleration >>= 1;	// 10/12/1998
+	//	engine_z_acceleration++;		// 10/12/1998
+	//	engine_z_acceleration >>= 1;	// 10/12/1998
 #endif
 
 	// reduce engine_z_acceleration if car is accelerating and not travelling backwards
@@ -2436,45 +2436,45 @@ static void CalculateTotalAcceleration (void)
 	//21/05/1998 - old method - if ((engine_z_acceleration > 0) && (player_z_speed >= 0))
 	reduction = ((engine_z_acceleration >> 8) | (player_z_speed >> 8)) & 0xff;
 	if ((reduction & 0x80) != 0x80)	// i.e. not negative
-		{
+	{
 		if ((engine_z_acceleration & 0xff) != 0)
-			{
+		{
 			engine_z_acceleration -= reduction;
-			}
 		}
+	}
 
 	// limit engine_z_acceleration to (2 * car_collision_y_acceleration) ?
 	// this possibly prevents the car from accelerating
 	// if it is not touching the road sufficiently (not enough grip)
 	twice_y = GetTwiceCollisionYAcceleration();		// should always be +'ve
 	if (abs(engine_z_acceleration) >= twice_y)
-		{
+	{
 		if (engine_z_acceleration < 0)
 			twice_y = -twice_y;		// correct sign
 
 		engine_z_acceleration = twice_y;
-		}
+	}
 
 	player_z_acceleration = engine_z_acceleration +
-							gravity_z_acceleration +
-							car_collision_z_acceleration;
+		gravity_z_acceleration +
+		car_collision_z_acceleration;
 
 	CalculateXAcceleration();
 	return;
-	}
+}
 
 
-static long GetTwiceCollisionYAcceleration (void)
-	{
-	if (! touching_road)
+static long GetTwiceCollisionYAcceleration(void)
+{
+	if (!touching_road)
 		return(0);
 
 	return(car_collision_y_acceleration * 2);
-	}
+}
 
 
-static void CalculateXAcceleration (void)
-	{
+static void CalculateXAcceleration(void)
+{
 	long twice_y, acceleration, speed_diff;
 
 	acceleration = gravity_x_acceleration + car_collision_x_acceleration;
@@ -2482,7 +2482,7 @@ static void CalculateXAcceleration (void)
 
 	twice_y = GetTwiceCollisionYAcceleration();		// should always be +'ve
 	if (abs(speed_diff) >= twice_y)
-		{
+	{
 		if (player_x_speed < 0)
 			twice_y = -twice_y;		// correct sign
 
@@ -2491,19 +2491,19 @@ static void CalculateXAcceleration (void)
 
 		// FOLLOWING VALUE NOT USED AT PRESENT
 		////collision_in_air = TRUE;	// not sure if it really signifies collision in air
-									// don't think it is used anyway
-		}
+		// don't think it is used anyway
+	}
 	else
-		{
+	{
 		// why isn't gravity_x_acceleration added here ?
 		player_x_acceleration = car_collision_x_acceleration - player_x_speed;
 
 		// FOLLOWING VALUE NOT USED AT PRESENT
 		////collision_in_air = FALSE;
-		}
+	}
 
 	return;
-	}
+}
 
 
 /*	======================================================================================= */
@@ -2515,8 +2515,8 @@ static void CalculateXAcceleration (void)
 static long y_angle_difference, difference_angle, pos_difference_angle;
 
 
-static void CalculateSteering (void)
-	{
+static void CalculateSteering(void)
+{
 	// basically affects player_y_angle
 	//			     and player_y_rotation_acceleration (which affects player_y_angle)
 	//
@@ -2561,16 +2561,16 @@ static void CalculateSteering (void)
 	// extra logic to allow car to drive round track in either direction
 	// Amiga StuntCarRacer didn't allow for this
 	// 01/07/1998 - NOTE: backwards flag only applies to curves
-	if (y_angle_difference > (_90_DEGREES))
-		{
+	if (y_angle_difference >(_90_DEGREES))
+	{
 		y_angle_difference -= (_180_DEGREES);
 		backwards = TRUE;
-		}
+	}
 	if (y_angle_difference < -(_90_DEGREES))
-		{
+	{
 		y_angle_difference += (_180_DEGREES);
 		backwards = TRUE;
-		}
+	}
 
 	//SECTION_Y_ANGLE = section_y_angle;
 
@@ -2578,21 +2578,21 @@ static void CalculateSteering (void)
 	// If player is on a curved section then adjust the difference angle
 	left_hand_bend = FALSE;
 	if ((Track[piece].type == 0x80) || (Track[piece].type == 0xc0))
-		{
+	{
 		// curve
 		// 01/07/1998 - correctly identify left/right hand bend when driving round backwards
 		if ((Track[piece].type == 0x80) ^ Track[piece].oppositeDirection ^ backwards)
-			{
+		{
 			// right hand bend
 			y_angle_difference += 217;
-			}
+		}
 		else
-			{
+		{
 			// left hand bend
 			y_angle_difference -= 217;
 			left_hand_bend = TRUE;
-			}
 		}
+	}
 
 
 	difference_angle = y_angle_difference;
@@ -2606,13 +2606,13 @@ static void CalculateSteering (void)
 
 
 	// If on last segment of road section then get data for next section
-		// (perhaps because last co-ords aren't used by StuntCarRacer ?)
-		// - not done at present
+	// (perhaps because last co-ords aren't used by StuntCarRacer ?)
+	// - not done at present
 
 
 	//fprintf(out, "left_right_value %d\n", left_right_value);
 	if (left_right_value != 0)
-		{
+	{
 		// player.is.steering
 
 		// work out if pos_difference_angle is going to increase
@@ -2620,16 +2620,16 @@ static void CalculateSteering (void)
 		long increasing = ((difference_angle < 0) ^ (left_right_value < 0));
 
 		if ((Track[piece].type == 0x80) || (Track[piece].type == 0xc0))
-			{
+		{
 			// curve
 			//fprintf(out, "curve\n");
 			if ((left_right_value >= 0) ^ left_hand_bend)
-				{
+			{
 				// steering into the bend
 				steering_amount = section_steering_amount + 45;
-				}
+			}
 			else
-				{
+			{
 				// steering away from bend
 				steering_amount = section_steering_amount - 35;
 
@@ -2641,38 +2641,38 @@ static void CalculateSteering (void)
 
 				// ensure steering assistance is not done
 				increasing = TRUE;
-				}
 			}
+		}
 		else
-			{
+		{
 			// straight
 			//fprintf(out, "straight\n");
 			steering_amount = section_steering_amount;
-			}
+		}
 
-		if (! increasing)
-			{
+		if (!increasing)
+		{
 			// Add current difference (between player and road) onto steering amount
 			// to assist steering when car is trying to keep in line with track
 			steering_amount += (scaled_pos_difference_angle >> 8);
-			}
+		}
 
 		CalculateSteeringAcceleration(steering_amount);
 		// end of function
-		}
+	}
 	else
-		{
+	{
 		// player.not.steering
 		y_angle_difference = 0;		// zero steering acceleration
 
 		if ((Track[piece].type == 0x00) || (Track[piece].type == 0x40))
-			{
+		{
 			// straight
 			AlignCarWithRoad();
 			AdjustSteeringAcceleration();
-			}
+		}
 		else
-			{
+		{
 			// curve
 
 			// NOTE: left_right_value below just used as +'ve/-'ve flag
@@ -2684,15 +2684,15 @@ static void CalculateSteering (void)
 			steering_amount = section_steering_amount;
 			// give effect of centrifugal force ?
 			CalculateSteeringAcceleration(steering_amount);
-			}
 		}
-
-	return;
 	}
 
+	return;
+}
 
-static void CalculateSteeringAcceleration (long steering_amount)
-	{
+
+static void CalculateSteeringAcceleration(long steering_amount)
+{
 	// Steering acceleration increases as player's speed increases
 
 	long steering_acceleration;
@@ -2703,10 +2703,10 @@ static void CalculateSteeringAcceleration (long steering_amount)
 	steering_acceleration = (player_z_speed * steering_amount) >> 8;
 
 	if (left_right_value < 0)
-		{
+	{
 		// steering left
 		steering_acceleration = -steering_acceleration;
-		}
+	}
 
 	steering_acceleration = steering_acceleration >> 3;
 
@@ -2714,17 +2714,17 @@ static void CalculateSteeringAcceleration (long steering_amount)
 	// store steering acceleration
 	y_angle_difference = steering_acceleration;
 
-	if (pos_difference_angle >= (30*256))
-		{
+	if (pos_difference_angle >= (30 * 256))
+	{
 		AlignCarWithRoad();
-		}
+	}
 	AdjustSteeringAcceleration();
 	return;
-	}
+}
 
 
-static void AlignCarWithRoad (void)
-	{
+static void AlignCarWithRoad(void)
+{
 	// Following code used to gradually bring the car back in
 	// line with the road - this helps steering considerably
 
@@ -2735,10 +2735,10 @@ static void AlignCarWithRoad (void)
 	adjust = pos_difference_angle;
 
 	if (adjust >= 256)
-		{
-		adjust -= (30*256);
+	{
+		adjust -= (30 * 256);
 		if (adjust >= 0)
-			{
+		{
 			// this section makes a large adjustment, e.g. 60 degrees,
 			// for when the car is very out of line (e.g. sideways with respect to road)
 
@@ -2750,11 +2750,11 @@ static void AlignCarWithRoad (void)
 				player_y_angle -= adjust;
 
 			return;
-			}
+		}
 
 		// set adjustment amount to maximum
 		adjust = 255;
-		}
+	}
 
 	// Adjustment of player's Y angle increases as player's speed increases
 
@@ -2782,11 +2782,11 @@ static void AlignCarWithRoad (void)
 		player_y_angle -= adjust;
 
 	return;
-	}
+}
 
 
-static void AdjustSteeringAcceleration (void)
-	{
+static void AdjustSteeringAcceleration(void)
+{
 	// eventually get y_angle_difference from calling function
 
 	long acceleration = y_angle_difference - player_y_rotation_speed;
@@ -2805,15 +2805,15 @@ static void AdjustSteeringAcceleration (void)
 #endif
 
 	return;
-	}
+}
 
 
 // current piece x/z co-ords (i.e. four corners of piece)
 static long px1, pz1, px2, pz2, px3, pz3, px4, pz4;
 
 
-static void IdentifyPiece (long x, long z, long *piece_in_out)
-	{
+static void IdentifyPiece(long x, long z, long *piece_in_out)
+{
 	// find the piece that the point is located within
 	long piece = *piece_in_out;
 
@@ -2824,7 +2824,7 @@ static void IdentifyPiece (long x, long z, long *piece_in_out)
 	GetPieceCoords(piece);
 
 
-//****************
+	//****************
 
 
 	// check point is not before or after piece (z direction)
@@ -2835,7 +2835,7 @@ static void IdentifyPiece (long x, long z, long *piece_in_out)
 	// 'before piece' loop
 	num_piece_changes = 0;
 	while (before_piece)
-		{
+	{
 		CalcXZRelativeToPiece(x, z, piece, &rx, &rz);
 
 		// calculate top dot product => before_piece
@@ -2844,7 +2844,7 @@ static void IdentifyPiece (long x, long z, long *piece_in_out)
 		before_piece = (((xs * zp) - (xp * zs)) < 0 ? TRUE : FALSE);
 
 		if (before_piece)
-			{
+		{
 			// future improvement: try a move in one direction,
 			// if this is worse then move in other direction
 
@@ -2855,17 +2855,17 @@ static void IdentifyPiece (long x, long z, long *piece_in_out)
 
 			// get the four (x,y,z) corner points of the new piece
 			GetPieceCoords(piece);
-			}
+		}
 
 		// prevent an infinite loop
 		if (num_piece_changes >= NumTrackPieces)
-			{
+		{
 #if defined(DEBUG) || defined(_DEBUG)
 			fprintf(out, "IdentifyPiece - infinite loop trapped (1)\n");
 #endif
 			break;
-			}
 		}
+	}
 
 #if defined(DEBUG) || defined(_DEBUG)
 	// warn if piece search was inefficient
@@ -2877,7 +2877,7 @@ static void IdentifyPiece (long x, long z, long *piece_in_out)
 	// 'after piece' loop
 	num_piece_changes = 0;
 	while (after_piece)
-		{
+	{
 		CalcXZRelativeToPiece(x, z, piece, &rx, &rz);
 
 		// calculate bottom dot product => after_piece
@@ -2886,7 +2886,7 @@ static void IdentifyPiece (long x, long z, long *piece_in_out)
 		after_piece = (((xs * zp) - (xp * zs)) < 0 ? TRUE : FALSE);
 
 		if (after_piece)
-			{
+		{
 			// future improvement: try a move in one direction,
 			// if this is worse then move in other direction
 
@@ -2897,17 +2897,17 @@ static void IdentifyPiece (long x, long z, long *piece_in_out)
 
 			// get the four (x,y,z) corner points of the new piece
 			GetPieceCoords(piece);
-			}
+		}
 
 		// prevent an infinite loop
 		if (num_piece_changes >= NumTrackPieces)
-			{
+		{
 #if defined(DEBUG) || defined(_DEBUG)
 			fprintf(out, "IdentifyPiece - infinite loop trapped (2)\n");
 #endif
 			break;
-			}
 		}
+	}
 
 #if defined(DEBUG) || defined(_DEBUG)
 	// warn if piece search was inefficient
@@ -2917,11 +2917,11 @@ static void IdentifyPiece (long x, long z, long *piece_in_out)
 
 	*piece_in_out = piece;
 	return;
-	}
+}
 
 
-static void GetPieceCoords (long piece)
-	{
+static void GetPieceCoords(long piece)
+{
 	long numSegments = Track[piece].numSegments;
 
 	px2 = Track[piece].coords[0].x;
@@ -2930,14 +2930,14 @@ static void GetPieceCoords (long piece)
 	px3 = Track[piece].coords[1].x;
 	pz3 = Track[piece].coords[1].z;
 
-	px1 = Track[piece].coords[(numSegments*4)].x;
-	pz1 = Track[piece].coords[(numSegments*4)].z;
+	px1 = Track[piece].coords[(numSegments * 4)].x;
+	pz1 = Track[piece].coords[(numSegments * 4)].z;
 
-	px4 = Track[piece].coords[(numSegments*4)+1].x;
-	pz4 = Track[piece].coords[(numSegments*4)+1].z;
+	px4 = Track[piece].coords[(numSegments * 4) + 1].x;
+	pz4 = Track[piece].coords[(numSegments * 4) + 1].z;
 
 	return;
-	}
+}
 
 
 /*	======================================================================================= */
@@ -2946,8 +2946,8 @@ static void GetPieceCoords (long piece)
 /*	Description:				*/
 /*	======================================================================================= */
 
-static void CalculateWorldAcceleration (void)
-	{
+static void CalculateWorldAcceleration(void)
+{
 	short *trig_coeffs = TrigCoefficients();
 
 	// Adds components of player's (i.e. rotated) X, Y and Z accelerations
@@ -2956,19 +2956,19 @@ static void CalculateWorldAcceleration (void)
 	// this function basically does the same as WorldOffset,
 	// then removes the precision from the resulting values
 
-	total_world_x_acceleration =  ((player_x_acceleration * (long)trig_coeffs[X_X_COMP]) >> LOG_PRECISION);
-	total_world_x_acceleration += ((player_y_acceleration * (long)trig_coeffs[Y_X_COMP]) >> LOG_PRECISION);
-	total_world_x_acceleration += ((player_z_acceleration * (long)trig_coeffs[Z_X_COMP]) >> LOG_PRECISION);
+	total_world_x_acceleration = ((player_x_acceleration * (long) trig_coeffs[X_X_COMP]) >> LOG_PRECISION);
+	total_world_x_acceleration += ((player_y_acceleration * (long) trig_coeffs[Y_X_COMP]) >> LOG_PRECISION);
+	total_world_x_acceleration += ((player_z_acceleration * (long) trig_coeffs[Z_X_COMP]) >> LOG_PRECISION);
 
-	total_world_y_acceleration =  ((player_x_acceleration * (long)trig_coeffs[X_Y_COMP]) >> LOG_PRECISION);
-	total_world_y_acceleration += ((player_y_acceleration * (long)trig_coeffs[Y_Y_COMP]) >> LOG_PRECISION);
-	total_world_y_acceleration += ((player_z_acceleration * (long)trig_coeffs[Z_Y_COMP]) >> LOG_PRECISION);
+	total_world_y_acceleration = ((player_x_acceleration * (long) trig_coeffs[X_Y_COMP]) >> LOG_PRECISION);
+	total_world_y_acceleration += ((player_y_acceleration * (long) trig_coeffs[Y_Y_COMP]) >> LOG_PRECISION);
+	total_world_y_acceleration += ((player_z_acceleration * (long) trig_coeffs[Z_Y_COMP]) >> LOG_PRECISION);
 
-	total_world_z_acceleration =  ((player_x_acceleration * (long)trig_coeffs[X_Z_COMP]) >> LOG_PRECISION);
-	total_world_z_acceleration += ((player_y_acceleration * (long)trig_coeffs[Y_Z_COMP]) >> LOG_PRECISION);
-	total_world_z_acceleration += ((player_z_acceleration * (long)trig_coeffs[Z_Z_COMP]) >> LOG_PRECISION);
+	total_world_z_acceleration = ((player_x_acceleration * (long) trig_coeffs[X_Z_COMP]) >> LOG_PRECISION);
+	total_world_z_acceleration += ((player_y_acceleration * (long) trig_coeffs[Y_Z_COMP]) >> LOG_PRECISION);
+	total_world_z_acceleration += ((player_z_acceleration * (long) trig_coeffs[Z_Z_COMP]) >> LOG_PRECISION);
 	return;
-	}
+}
 
 
 /*	======================================================================================= */
@@ -2981,31 +2981,31 @@ extern bool player_close_to_opponent;
 extern bool opponent_behind_player;
 
 
-static void ReduceWorldAcceleration (void)
-	{
+static void ReduceWorldAcceleration(void)
+{
 	long	amount = 0, factor, normal_situation = TRUE;
 	long	y_speed, z_speed, reduction;
 
 	factor = 1;		// set maximum reduction factor
 
 	if ((touching_road) || (on_chains))
-		{
+	{
 		amount = abs(car_to_road_collision_z_acceleration >> 8);
 
 		if ((amount >= 3) || (off_map_status != 0) || (WRECKED) || (on_chains))
-			{
+		{
 			// collision_z_acceleration large, off map, wrecked or on chains
 			if ((WRECKED) || (on_chains))
 				factor = 3;		// set medium reduction factor
 
 			amount = 0x6000;
 			normal_situation = FALSE;
-			}
 		}
+	}
 
 	// Normal case - car not on chains, little Z collision with road
 	if (normal_situation)
-		{
+	{
 		// reduce accelerations, depending upon car speed
 
 		// get greatest of player's x, y and z speeds
@@ -3027,12 +3027,12 @@ static void ReduceWorldAcceleration (void)
 		// infront of the player then the player is in the slipstream of the
 		// opponent, so there is less drag on the player's car.
 		if ((player_close_to_opponent) && (!opponent_behind_player))
-			{
+		{
 			// Make reduction smaller
-			amount -= (20*128);
+			amount -= (20 * 128);
 			if (amount < 0) amount = 0;
-			}
 		}
+	}
 
 	// Reduce acceleration values using current speed values.
 	// amount = reduction amount, factor = overall reduction factor.
@@ -3045,7 +3045,7 @@ static void ReduceWorldAcceleration (void)
 	reduction = (((player_world_z_speed * amount) >> 16) >> factor);
 	total_world_z_acceleration -= reduction;
 	return;
-	}
+}
 
 
 /*	======================================================================================= */
@@ -3054,8 +3054,8 @@ static void ReduceWorldAcceleration (void)
 /*	Description:				*/
 /*	======================================================================================= */
 
-static void CalculateXZRotationAcceleration (void)
-	{
+static void CalculateXZRotationAcceleration(void)
+{
 	// Calculate values using current car rotation speeds and inclination values
 	// between the car and the road, in order to damp the car X and Z angles
 	// and keep the car level with the road, on its X and Z axes.  Also give
@@ -3073,16 +3073,16 @@ static void CalculateXZRotationAcceleration (void)
 	// - perhaps values used are really accelerations rather than inclinations
 
 	player_x_rotation_acceleration = overall_difference_below_road -
-										(player_x_rotation_speed >> 4);
+		(player_x_rotation_speed >> 4);
 	if (touching_road)
-		{
+	{
 		// This part lifts the car up at the front during forwards acceleration
 		// and, vice versa, dips the front of the car during backwards acceleration.
 		player_x_rotation_acceleration += (player_z_acceleration >> 2);
-		}
+	}
 
 	player_z_rotation_acceleration = front_difference_below_road -
-										(player_z_rotation_speed >> 4);
+		(player_z_rotation_speed >> 4);
 
 #ifdef	HIGHER_FRAME_RATE
 	// 08/11/1998 - allow four times the frame rate by dividing accelerations by four
@@ -3092,7 +3092,7 @@ static void CalculateXZRotationAcceleration (void)
 	player_z_rotation_acceleration >>= 1;
 #endif
 	return;
-	}
+}
 
 
 /*	======================================================================================= */
@@ -3101,8 +3101,8 @@ static void CalculateXZRotationAcceleration (void)
 /*	Description:				*/
 /*	======================================================================================= */
 
-static void UpdatePlayersRotationSpeed (void)
-	{
+static void UpdatePlayersRotationSpeed(void)
+{
 	long acceleration;
 
 	acceleration = ((player_x_rotation_acceleration * REDUCTION) >> 8);
@@ -3114,7 +3114,7 @@ static void UpdatePlayersRotationSpeed (void)
 	acceleration = ((player_z_rotation_acceleration * REDUCTION) >> 8);
 	player_z_rotation_speed += acceleration;
 	return;
-	}
+}
 
 
 /*	======================================================================================= */
@@ -3123,8 +3123,8 @@ static void UpdatePlayersRotationSpeed (void)
 /*	Description:				*/
 /*	======================================================================================= */
 
-static void CalculateFinalRotationSpeed (void)
-	{
+static void CalculateFinalRotationSpeed(void)
+{
 	short sin_x, cos_x;
 	short sin_z, cos_z;
 
@@ -3135,18 +3135,18 @@ static void CalculateFinalRotationSpeed (void)
 	// PC StuntCarRacer Z rotation (i.e. RotX = Xcosz - Ysinz, RotY = Xsinz + Ycosz)
 	// and so does X rotation
 
-	player_final_x_rotation_speed =  ((player_x_rotation_speed * (long)cos_z) >> LOG_PRECISION);
-	player_final_x_rotation_speed += ((player_y_rotation_speed * (long)-sin_z) >> LOG_PRECISION);
+	player_final_x_rotation_speed = ((player_x_rotation_speed * (long) cos_z) >> LOG_PRECISION);
+	player_final_x_rotation_speed += ((player_y_rotation_speed * (long) -sin_z) >> LOG_PRECISION);
 
-	player_final_y_rotation_speed =  ((player_x_rotation_speed * (long)sin_z) >> LOG_PRECISION);
-	player_final_y_rotation_speed += ((player_y_rotation_speed * (long)cos_z) >> LOG_PRECISION);
+	player_final_y_rotation_speed = ((player_x_rotation_speed * (long) sin_z) >> LOG_PRECISION);
+	player_final_y_rotation_speed += ((player_y_rotation_speed * (long) cos_z) >> LOG_PRECISION);
 
 	// Calculate final Z rotation speed by rotating Y rotation speed about
 	// the X axis and adding it onto the Z rotation speed.
-	player_final_z_rotation_speed =  player_z_rotation_speed;
-	player_final_z_rotation_speed += ((player_final_y_rotation_speed * (long)sin_x) >> LOG_PRECISION);
+	player_final_z_rotation_speed = player_z_rotation_speed;
+	player_final_z_rotation_speed += ((player_final_y_rotation_speed * (long) sin_x) >> LOG_PRECISION);
 	return;
-	}
+}
 
 
 /*	======================================================================================= */
@@ -3155,8 +3155,8 @@ static void CalculateFinalRotationSpeed (void)
 /*	Description:				*/
 /*	======================================================================================= */
 
-static void UpdatePlayersWorldSpeed (void)
-	{
+static void UpdatePlayersWorldSpeed(void)
+{
 	long acceleration;
 
 	acceleration = ((total_world_x_acceleration * REDUCTION) >> 8);
@@ -3168,7 +3168,7 @@ static void UpdatePlayersWorldSpeed (void)
 	acceleration = ((total_world_z_acceleration * REDUCTION) >> 8);
 	player_world_z_speed += acceleration;
 	return;
-	}
+}
 
 /*	======================================================================================= */
 /*	Function:		UpdatePlayersPosition													*/
@@ -3176,11 +3176,11 @@ static void UpdatePlayersWorldSpeed (void)
 /*	Description:				*/
 /*	======================================================================================= */
 
-static void UpdatePlayersPosition (void)
-	{
+static void UpdatePlayersPosition(void)
+{
 	long speed, angle, limit;
 
-//******** Set player's new position ********
+	//******** Set player's new position ********
 
 #ifdef ORIGINAL
 	// following speeds could be worked out differently, using just one shift, then an AND
@@ -3215,7 +3215,7 @@ static void UpdatePlayersPosition (void)
 	if (player_y >= 0x10000000)
 		player_y = 0x10000000;
 
-//******** Set player's new angles ********
+	//******** Set player's new angles ********
 
 	speed = ((player_final_x_rotation_speed * REDUCTION) >> 8);
 	player_x_angle += speed;
@@ -3231,24 +3231,24 @@ static void UpdatePlayersPosition (void)
 	player_y_angle &= (MAX_ANGLE - 1);
 	player_z_angle &= (MAX_ANGLE - 1);
 
-//******** Check player's X angle ********
+	//******** Check player's X angle ********
 
 	if ((at_side_byte == 0xe0) && (smaller_limit_required))
-		{
+	{
 		// all wheels off road and car on ground
-		limit = 11*256;
-		}
+		limit = 11 * 256;
+	}
 	else // not off side of track
-		{
-		limit = 45*256;
-		}
+	{
+		limit = 45 * 256;
+	}
 
 	// get angle in Amiga StuntCarRacer format (i.e. correct sign)
 	angle = (player_x_angle < (_180_DEGREES) ? (player_x_angle) :
-											   (player_x_angle - _360_DEGREES));
+		(player_x_angle - _360_DEGREES));
 
 	if (abs(angle) > limit)
-		{
+	{
 		if (angle >= 0)
 			angle = limit;
 		else
@@ -3259,20 +3259,20 @@ static void UpdatePlayersPosition (void)
 
 		if (((player_x_rotation_speed >= 0) && (angle < 0)) ||
 			((player_x_rotation_speed < 0) && (angle >= 0)))
-			{
+		{
 			// values have different signs
 			player_x_rotation_speed = 0;
-			}
 		}
+	}
 
-//******** Check player's Z angle ********
+	//******** Check player's Z angle ********
 
 	// get angle in Amiga StuntCarRacer format (i.e. correct sign)
 	angle = (player_z_angle < (_180_DEGREES) ? (player_z_angle) :
-											   (player_z_angle - _360_DEGREES));
+		(player_z_angle - _360_DEGREES));
 
 	if (abs(angle) > limit)
-		{
+	{
 		if (angle >= 0)
 			angle = limit;
 		else
@@ -3283,17 +3283,17 @@ static void UpdatePlayersPosition (void)
 
 		if (((player_z_rotation_speed >= 0) && (angle < 0)) ||
 			((player_z_rotation_speed < 0) && (angle >= 0)))
-			{
+		{
 			// values have different signs
 			player_z_rotation_speed = 0;
-			}
 		}
+	}
 
-//****************************************
+	//****************************************
 
 	// rest of Amiga StuntCarRacer code not needed
 	return;
-	}
+}
 
 
 /*	======================================================================================= */
@@ -3304,35 +3304,35 @@ static void UpdatePlayersPosition (void)
 /*					(Assumes the provided x/z point is within and relative to the piece.)	*/
 /*	======================================================================================= */
 
-static long CalcSectionYAngle (long piece,
-							   long x,
-							   long z)
-	{
+static long CalcSectionYAngle(long piece,
+	long x,
+	long z)
+{
 	long section_y_angle;
 	long radius;					// not used
 	double distance_from_centre;	// not used
 
 	// check for and handle straight
 	if (Track[piece].type == 0x00)
-		{
+	{
 		section_y_angle = -Track[piece].roughPieceAngle;
 		section_y_angle &= (MAX_ANGLE - 1);
 		return(section_y_angle);
-		}
+	}
 	// check for and handle diagonal straight
 	else if (Track[piece].type == 0x40)
-		{
+	{
 		// Amiga StuntCarRacer always adds 0x2000 on for these pieces (i.e. 45 degrees)
-		section_y_angle = -(Track[piece].roughPieceAngle + (MAX_ANGLE/8));
+		section_y_angle = -(Track[piece].roughPieceAngle + (MAX_ANGLE / 8));
 		section_y_angle &= (MAX_ANGLE - 1);
 		return(section_y_angle);
-		}
+	}
 
 	// must be a curve (type will be -'ve)
 	CalcCurveMeasurements(piece, x, z, &section_y_angle, &radius, &distance_from_centre);
 
 	// change sign if right hand curve (i.e. default calculation is for left hand curve)
-	if (! Track[piece].curveToLeft)
+	if (!Track[piece].curveToLeft)
 		section_y_angle = -section_y_angle;
 
 	// add on rough piece angle to get final section y angle
@@ -3340,13 +3340,13 @@ static long CalcSectionYAngle (long piece,
 
 	// adjust for normal direction of travel
 	if (Track[piece].oppositeDirection)
-		section_y_angle += (MAX_ANGLE/2);	// plus 180 degrees
+		section_y_angle += (MAX_ANGLE / 2);	// plus 180 degrees
 
 	// limit to valid range
 	section_y_angle &= (MAX_ANGLE - 1);
 
 	return(section_y_angle);
-	}
+}
 
 
 /*	======================================================================================= */
@@ -3359,13 +3359,13 @@ static long CalcSectionYAngle (long piece,
 /*					(Assumes the provided x/z point is within and relative to the piece.)	*/
 /*	======================================================================================= */
 
-static void CalcCurveMeasurements (long piece,
-								   long x,
-								   long z,
-								   long *y_angle_out,
-								   long *radius_out,
-								   double *distance_from_centre_out)
-	{
+static void CalcCurveMeasurements(long piece,
+	long x,
+	long z,
+	long *y_angle_out,
+	long *radius_out,
+	double *distance_from_centre_out)
+{
 	long xf, zf, xl, zl, xo, zo, xc, zc;
 	long numSegments, radius;
 	double o, a, radians, angle;
@@ -3382,7 +3382,7 @@ static void CalcCurveMeasurements (long piece,
 	numSegments = Track[piece].numSegments;
 
 	// get first and last co-ordinates from inner or outer edge
-	long first = 0, last = numSegments*4;
+	long first = 0, last = numSegments * 4;
 
 	xf = Track[piece].coords[first].x;
 	zf = Track[piece].coords[first].z;
@@ -3394,10 +3394,10 @@ static void CalcCurveMeasurements (long piece,
 
 	// 14/05/1998 - need to use horizontal/vertical edge when calculating circle centre
 	// check first edge is horizontal/vertical, if not then use last edge
-	xo = Track[piece].coords[first+1].x;
-	zo = Track[piece].coords[first+1].z;
+	xo = Track[piece].coords[first + 1].x;
+	zo = Track[piece].coords[first + 1].z;
 	if ((xo != xf) && (zo != zf))
-		{
+	{
 		// use last edge
 		// note that variable names are now misleading (i.e. opposite meaning)
 		xf = Track[piece].coords[last].x;
@@ -3405,23 +3405,23 @@ static void CalcCurveMeasurements (long piece,
 		xl = Track[piece].coords[first].x;
 		zl = Track[piece].coords[first].z;
 
-		xo = Track[piece].coords[last+1].x;
-		zo = Track[piece].coords[last+1].z;
-		}
+		xo = Track[piece].coords[last + 1].x;
+		zo = Track[piece].coords[last + 1].z;
+	}
 
 	// check resulting edge is horizontal/vertical
 	if ((xo != xf) && (zo != zf))
-		{
+	{
 #if defined(DEBUG) || defined(_DEBUG)
 		fprintf(out, "Piece %d has no horizontal or vertical edge\n", piece);
 #endif
 		return;
-		}
+	}
 
 	// calculate co-ordinate of circle centre
 	// uses first co-ordinate from other edge, for comparison
 	if (xo != xf)
-		{
+	{
 		// piece edge is horizontal
 		if (xf < xl)
 			xc = xf + radius;
@@ -3430,11 +3430,11 @@ static void CalcCurveMeasurements (long piece,
 
 		zc = zf;
 
-		o = (double)(z - zc);
-		a = (double)(x - xc);
-		}
+		o = (double) (z - zc);
+		a = (double) (x - xc);
+	}
 	else if (zo != zf)
-		{
+	{
 		// piece edge is vertical
 		xc = xf;
 
@@ -3443,30 +3443,30 @@ static void CalcCurveMeasurements (long piece,
 		else
 			zc = zf - radius;
 
-		o = (double)(x - xc);
-		a = (double)(z - zc);
-		}
+		o = (double) (x - xc);
+		a = (double) (z - zc);
+	}
 	else
-		{
+	{
 #if defined(DEBUG) || defined(_DEBUG)
 		fprintf(out, "Piece %d edge is invalid (both ends are same)\n", piece);
 #endif
 		return;
-		}
+	}
 
 	// use inverse tan to calculate basic angle in radians
 	if (a == 0)		// prevent division by zero
-		radians = (double)PI / (double)2;	// 90 degrees
+		radians = (double) PI / (double) 2;	// 90 degrees
 	else
-		radians = atan(o/a);	// inverse tan
+		radians = atan(o / a);	// inverse tan
 
 	// convert radians to internal angle (also round up)
-	angle = ((radians * (double)MAX_ANGLE) / ((double)2 * (double)PI));
+	angle = ((radians * (double) MAX_ANGLE) / ((double) 2 * (double) PI));
 	// convert to absolute and round up as follows (because abs() isn't for doubles)
 	if (angle > 0)
-		*y_angle_out = (long)(angle + (double)0.5);
+		*y_angle_out = (long) (angle + (double)0.5);
 	else
-		*y_angle_out = (long)((double)0.5 - angle);
+		*y_angle_out = (long) ((double)0.5 - angle);
 
 
 	// output radius
@@ -3476,7 +3476,7 @@ static void CalcCurveMeasurements (long piece,
 	// calculate distance from circle centre to (x,z) point
 	*distance_from_centre_out = sqrt((o*o) + (a*a));
 	return;
-	}
+}
 
 
 /*	======================================================================================= */
@@ -3485,40 +3485,40 @@ static void CalcCurveMeasurements (long piece,
 /*	Description:	Convert an Amiga volume level to a value for use with DirectX			*/
 /*	======================================================================================= */
 
-long AmigaVolumeToDirectX (long amiga_volume)
-	{
+long AmigaVolumeToDirectX(long amiga_volume)
+{
 	static long first_time = TRUE;
-	static long directx_volume[MAX_AMIGA_VOLUME+1];		// range 0 to MAX
+	static long directx_volume[MAX_AMIGA_VOLUME + 1];		// range 0 to MAX
 	long i;
 	double db;
 
-	if ( first_time )
-	    {
+	if (first_time)
+	{
 		// populate the lookup table
 		// NOTE: volume 0 cannot be calculated
 		directx_volume[0] = -100 * DIRECTX_VOLUME_FACTOR;	// -100 dB, essentially silent
 
-		for ( i = 1; i < (MAX_AMIGA_VOLUME+1); i++ )
-			{
-			db = (double)20 * log10((double)i/(double)MAX_AMIGA_VOLUME);
-			directx_volume[i] = (long)(db * (double)DIRECTX_VOLUME_FACTOR);
-			}
+		for (i = 1; i < (MAX_AMIGA_VOLUME + 1); i++)
+		{
+			db = (double) 20 * log10((double) i / (double) MAX_AMIGA_VOLUME);
+			directx_volume[i] = (long) (db * (double) DIRECTX_VOLUME_FACTOR);
+		}
 
 		first_time = FALSE;
-		}
+	}
 
 	// validate Amiga volume
 	if ((amiga_volume < 0) || (amiga_volume > MAX_AMIGA_VOLUME))
-		{
+	{
 #if defined(DEBUG) || defined(_DEBUG)
 		fprintf(out, "Invalid Amiga Volume %d - defaulting to maximum\n", amiga_volume);
 #endif
 		amiga_volume = MAX_AMIGA_VOLUME;
-		}
+	}
 
 	// return DirectX volume
 	return(directx_volume[amiga_volume]);
-	}
+}
 
 
 /*	======================================================================================= */
@@ -3531,17 +3531,17 @@ long AmigaVolumeToDirectX (long amiga_volume)
 extracts from :-
 
 set.players.restart.position
-	find suitable road section for car to start on
-	position car above middle of section's square, facing correct direction
-	calculate player's x offset from centre of road (flag if off road)
-	put player to one side of the road (player.to.side.of.road)
-	return;
+find suitable road section for car to start on
+position car above middle of section's square, facing correct direction
+calculate player's x offset from centre of road (flag if off road)
+put player to one side of the road (player.to.side.of.road)
+return;
 */
 
-extern unsigned char sections_car_can_be_put_on[];
+extern unsigned char sections_car_can_be_put_on [];
 
 
-static void PositionCarAbovePiece (long piece)
+static void PositionCarAbovePiece(long piece)
 {
 	long piece_x, piece_z, height;
 
@@ -3567,18 +3567,18 @@ static void PositionCarAbovePiece (long piece)
 	piece_z = Track[piece].z << LOG_CUBE_SIZE;
 
 	// set car x/z position to middle of piece
-	player_x = piece_x + CUBE_SIZE/2;// + CUBE_SIZE/16;
-	player_z = piece_z + CUBE_SIZE/2;// + CUBE_SIZE/16;
+	player_x = piece_x + CUBE_SIZE / 2;// + CUBE_SIZE/16;
+	player_z = piece_z + CUBE_SIZE / 2;// + CUBE_SIZE/16;
 
 	// set car y position
-//	debug_position = TRUE;
+	//	debug_position = TRUE;
 	CalculateWorldRoadHeight(0, player_x, player_z, &height);
 #if defined(DEBUG) || defined(_DEBUG)
 	debug_position = FALSE;
 	fprintf(out, "PositionCarAbovePiece x,z: 0x%x,0x%x.  CalculateWorldRoadHeight: 0x%x\n", player_x, player_z, height);
 #endif
 	// convert the result to PC StuntCarRacer magnitude
-	height = ((height / PC_FACTOR) >> (LOG_PRECISION-3));
+	height = ((height / PC_FACTOR) >> (LOG_PRECISION - 3));
 
 	height = (height + 0xc00) * 256;
 	player_y = height;
@@ -3594,16 +3594,16 @@ static void PositionCarAbovePiece (long piece)
 	player_y_angle = Track[piece].roughPieceAngle;
 
 	if (Track[piece].oppositeDirection)
-		{
-		player_y_angle += (MAX_ANGLE/2);	// plus 180 degrees
-		}
+	{
+		player_y_angle += (MAX_ANGLE / 2);	// plus 180 degrees
+	}
 
 	// check for and handle diagonal straight
 	if (Track[piece].type == 0x40)
-		{
+	{
 		// Amiga StuntCarRacer always adds 0x2000 on for these pieces (i.e. 45 degrees)
-		player_y_angle += (MAX_ANGLE/8);
-		}
+		player_y_angle += (MAX_ANGLE / 8);
+	}
 
 	player_y_angle &= (MAX_ANGLE - 1);
 
@@ -3616,8 +3616,8 @@ static void PositionCarAbovePiece (long piece)
 	 */
 	short sin_y, cos_y;
 	GetSinCos(player_y_angle, &sin_y, &cos_y);
-	player_x += (160 * (long)cos_y);
-	player_z -= (160 * (long)sin_y);
+	player_x += (160 * (long) cos_y);
+	player_z -= (160 * (long) sin_y);
 }
 
 
@@ -3627,8 +3627,8 @@ static void PositionCarAbovePiece (long piece)
 /*	Description:	Calculate speed value for display, using player_z_speed					*/
 /*	======================================================================================= */
 
-long CalculateDisplaySpeed (void)
-	{
+long CalculateDisplaySpeed(void)
+{
 	long speed;
 
 	speed = player_z_speed;
@@ -3637,7 +3637,7 @@ long CalculateDisplaySpeed (void)
 	speed = ((speed * 183) >> 15);
 
 	return(speed);
-	}
+}
 
 /*	======================================================================================= */
 /*	Function:		UpdateEngineRevs														*/
@@ -3650,9 +3650,9 @@ static long engineRevsChange = 0;
 static long engineFluctuation = 0;
 
 // Tested against Amiga
-static void UpdateEngineRevs (void)
+static void UpdateEngineRevs(void)
 {
-int c;
+	int c;
 
 #ifdef	TEST_AMIGA_UER
 	long temp;
@@ -3667,8 +3667,8 @@ int c;
 		accelerate = temp & 0x01 ? TRUE : FALSE;
 		brake = temp & 0x02 ? TRUE : FALSE;
 
-	GetRecordedAmigaWord(&player_z_speed);
-	GetRecordedAmigaWord(&engineRevs);
+		GetRecordedAmigaWord(&player_z_speed);
+		GetRecordedAmigaWord(&engineRevs);
 	}
 #endif
 
@@ -3752,34 +3752,34 @@ int engineSoundIndex = -1;
 // All sounds playing but mute the ones that aren't required - WORSE
 // Start the new sound playing at the same percentage through as the previous sound - SLIGHTLY BETTER
 
-void FramesWheelsEngine (IDirectSoundBuffer8 *engineSoundBuffers[])
+void FramesWheelsEngine(IDirectSoundBuffer8 *engineSoundBuffers [])
 {
-/* SECTION BELOW HASN'T BEEN CONVERTED
-	clr.w	d1
-	clr.w	d2
-	tst.b	frame.count
-	beq	fwe1
-	subq.b	#1,frame.count
+	/* SECTION BELOW HASN'T BEEN CONVERTED
+		clr.w	d1
+		clr.w	d2
+		tst.b	frame.count
+		beq	fwe1
+		subq.b	#1,frame.count
 
-fwe1	tst.b	fade.frame.count
-	beq	fwe2
-	subq.b	#1,fade.frame.count
+		fwe1	tst.b	fade.frame.count
+		beq	fwe2
+		subq.b	#1,fade.frame.count
 
-fwe2	tst.b	B.5d724
-	bpl	fwe3
+		fwe2	tst.b	B.5d724
+		bpl	fwe3
 
-	tst.b	no.wheel.update
-	bne	fwe3
-	jsr	update.wheel.rotation
+		tst.b	no.wheel.update
+		bne	fwe3
+		jsr	update.wheel.rotation
 
-fwe3	move.w	sprite.DMA.value,dmacon+custom
-*/
+		fwe3	move.w	sprite.DMA.value,dmacon+custom
+		*/
 
-int period, index;
-DWORD freq;
-int r = engineRevs + engineRevsChange;
-static int lastEngineSoundIndex = -1;
-DWORD currentPlayCursor;
+	int period, index;
+	DWORD freq;
+	int r = engineRevs + engineRevsChange;
+	static int lastEngineSoundIndex = -1;
+	DWORD currentPlayCursor;
 
 	if (r < 0)
 	{
@@ -3827,14 +3827,14 @@ DWORD currentPlayCursor;
 
 		r <<= 1;
 	}
-	freq = ((AMIGA_PAL_HZ/1000) * r) / (4800000/1000);
+	freq = ((AMIGA_PAL_HZ / 1000) * r) / (4800000 / 1000);
 #endif
 
 	// temp store new engine sound index and period
 	enginePeriod = period;
 	engineSoundIndex = index;
 
-//	fprintf(out, "period %d, freq %d\n", period, freq);
+	//	fprintf(out, "period %d, freq %d\n", period, freq);
 	if (!engineSoundPlaying)
 	{
 		// Reset last index so that logic below will restart the engine (e.g. after game was paused)
@@ -3861,10 +3861,10 @@ DWORD currentPlayCursor;
 			currentPlayCursor = currentPlayCursor * 2;
 
 		engineSoundBuffers[engineSoundIndex]->SetCurrentPosition(currentPlayCursor);
-		engineSoundBuffers[engineSoundIndex]->Play(NULL,NULL,DSBPLAY_LOOPING);
+		engineSoundBuffers[engineSoundIndex]->Play(NULL, NULL, DSBPLAY_LOOPING);
 
-	lastEngineSoundIndex = engineSoundIndex;
-	engineSoundPlaying = TRUE;
+		lastEngineSoundIndex = engineSoundIndex;
+		engineSoundPlaying = TRUE;
 	}
 
 	// Set the frequency of the current engine sound
@@ -3872,32 +3872,32 @@ DWORD currentPlayCursor;
 }
 
 #ifdef TESTENGINE
-extern IDirectSoundBuffer8 *EngineSoundBuffers[];
+extern IDirectSoundBuffer8 *EngineSoundBuffers [];
 
-void EngineSoundStopped (void)
+void EngineSoundStopped(void)
 {
 	/*
 DWORD freq = 3546895 / enginePeriod;
 
-	fprintf(out, "Engine sound stopped\n");
+fprintf(out, "Engine sound stopped\n");
 
-	// Start the new engine sound
-	EngineSoundBuffers[engineSoundIndex]->SetCurrentPosition(0);
-	EngineSoundBuffers[engineSoundIndex]->Play(NULL,NULL,NULL);
+// Start the new engine sound
+EngineSoundBuffers[engineSoundIndex]->SetCurrentPosition(0);
+EngineSoundBuffers[engineSoundIndex]->Play(NULL,NULL,NULL);
 
-	// Set the frequency of the current engine sound
-	EngineSoundBuffers[engineSoundIndex]->SetFrequency(freq);
+// Set the frequency of the current engine sound
+EngineSoundBuffers[engineSoundIndex]->SetFrequency(freq);
 
-	engineSoundPlaying = TRUE;
-	*/
+engineSoundPlaying = TRUE;
+*/
 
-int period, index;
-DWORD freq;
-int r;
+	int period, index;
+	DWORD freq;
+	int r;
 
-//	touching_road = TRUE;
-//	player_z_speed += 0x100;
-//	UpdateEngineRevs();
+	//	touching_road = TRUE;
+	//	player_z_speed += 0x100;
+	//	UpdateEngineRevs();
 
 	engineRevsChange = 2;
 
@@ -3912,7 +3912,7 @@ int r;
 
 	if (period >= 0x3fff) period = 0x3ffe;
 
-//	period = period | engineFluctuation;
+	//	period = period | engineFluctuation;
 	if (period < 124) period = 124;	// lowest possible period
 
 	// Calculate sound index that will give period < 256
@@ -3928,12 +3928,12 @@ int r;
 	enginePeriod = period;
 	engineSoundIndex = index;
 
-//	if (index > 0)
-//		return;
+	//	if (index > 0)
+	//		return;
 
 	// Start the new engine sound
 	EngineSoundBuffers[engineSoundIndex]->SetCurrentPosition(0);
-	EngineSoundBuffers[engineSoundIndex]->Play(NULL,NULL,NULL);
+	EngineSoundBuffers[engineSoundIndex]->Play(NULL, NULL, NULL);
 
 	// Set the frequency of the current engine sound
 	EngineSoundBuffers[engineSoundIndex]->SetFrequency(freq);
@@ -3947,9 +3947,9 @@ int r;
 /*	Description:	Calculate player position values required for Opponent Behaviour		*/
 /*	======================================================================================= */
 
-void CalculatePlayersRoadPosition (void)
+void CalculatePlayersRoadPosition(void)
 {
-long height;	// Not used
+	long height;	// Not used
 
 	// Calculate the position of the car's centre
 	CalculateWorldRoadHeight(CENTRE, player_x, player_z, &height);
@@ -3962,7 +3962,7 @@ long height;	// Not used
 /*	Description:				*/
 /*	======================================================================================= */
 
-void DrawOtherGraphics( void )
+void DrawOtherGraphics(void)
 {
 	// Draw other graphics that are done as part of 'draw.world'
 	if ((!on_chains) && (off_map_status != 0))
@@ -3979,7 +3979,7 @@ void DrawOtherGraphics( void )
 /*	Description:				*/
 /*	======================================================================================= */
 
-static void DrawDustClouds (void)
+static void DrawDustClouds(void)
 {
 	// currently just plays the sound effect
 
@@ -3992,9 +3992,9 @@ static void DrawDustClouds (void)
 	if (!touching_road)
 		return;
 
-//	OffRoadSoundBuffer->Stop();
-//	OffRoadSoundBuffer->SetCurrentPosition(0);
-	OffRoadSoundBuffer->Play(NULL,NULL,NULL);	// not looping
+	//	OffRoadSoundBuffer->Stop();
+	//	OffRoadSoundBuffer->SetCurrentPosition(0);
+	OffRoadSoundBuffer->Play(NULL, NULL, NULL);	// not looping
 }
 
 /*	======================================================================================= */
@@ -4003,9 +4003,9 @@ static void DrawDustClouds (void)
 /*	Description:				*/
 /*	======================================================================================= */
 
-static void DrawSparks (void)
+static void DrawSparks(void)
 {
-int p;
+	int p;
 
 	// currently just plays the sound effect
 
@@ -4037,8 +4037,8 @@ on_an_edge:
 	if (!touching_road)
 		return;
 
-//	WreckSoundBuffer->SetCurrentPosition(0);
-	WreckSoundBuffer->Play(NULL,NULL,NULL);	// not looping
+	//	WreckSoundBuffer->SetCurrentPosition(0);
+	WreckSoundBuffer->Play(NULL, NULL, NULL);	// not looping
 }
 
 /*	======================================================================================= */
@@ -4047,7 +4047,7 @@ on_an_edge:
 /*	Description:				*/
 /*	======================================================================================= */
 
-void UpdateDamage (void)
+void UpdateDamage(void)
 {
 	if (damaged)
 	{
@@ -4082,7 +4082,7 @@ void UpdateDamage (void)
 
 	// Play smash sound effect
 	//SmashSoundBuffer->SetCurrentPosition(0);
-	SmashSoundBuffer->Play(NULL,NULL,NULL);	// not looping
+	SmashSoundBuffer->Play(NULL, NULL, NULL);	// not looping
 	return;
 
 PlayCreakSound:
@@ -4093,7 +4093,7 @@ PlayCreakSound:
 
 	CreakSoundBuffer->SetVolume(AmigaVolumeToDirectX(amiga_volume));
 	//CreakSoundBuffer->SetCurrentPosition(0);
-	CreakSoundBuffer->Play(NULL,NULL,NULL);	// not looping
+	CreakSoundBuffer->Play(NULL, NULL, NULL);	// not looping
 	return;
 }
 
@@ -4109,16 +4109,16 @@ extern long opponents_current_piece;	// use as opponents_road_section
 
 bool raceFinished, raceWon;
 long lapNumber[NUM_CARS];
-static bool carOnFirstHalfOfLap[NUM_CARS] = {false, false};
+static bool carOnFirstHalfOfLap[NUM_CARS] = { false, false };
 
-void ResetLapData (long car)
+void ResetLapData(long car)
 {
 	raceFinished = raceWon = FALSE;
 	lapNumber[car] = 0;
 	carOnFirstHalfOfLap[car] = false;
 }
 
-void UpdateLapData (void)
+void UpdateLapData(void)
 {
 	long car, current_piece, start_finish_piece = (StartLinePiece + 1 < NumTrackPieces) ? (StartLinePiece + 1) : 0;
 
@@ -4138,8 +4138,8 @@ void UpdateLapData (void)
 		}
 	}
 
-//	VALUE2 = lapNumber[OPPONENT];
-//	VALUE3 = carOnFirstHalfOfLap[PLAYER] ? 1 : 0;
+	//	VALUE2 = lapNumber[OPPONENT];
+	//	VALUE3 = carOnFirstHalfOfLap[PLAYER] ? 1 : 0;
 
 	for (car = OPPONENT; car < NUM_CARS; car++)
 	{
@@ -4173,80 +4173,80 @@ void UpdateLapData (void)
 #define	RECORDING_SIZE	(4096)
 
 typedef struct
-	{
+{
 	BYTE input;		// this is sufficient to hold required input
-	} RECORDING;
+} RECORDING;
 
 static size_t RecordingIndex, EndOfRecording;			// indexes into following buffer
 static RECORDING RecordingBuffer[RECORDING_SIZE];
 
 
-static void RewindRecording (void)
-	{
+static void RewindRecording(void)
+{
 	RecordingIndex = 0;
-	}
+}
 
 
-static void Record (DWORD input)
-	{
+static void Record(DWORD input)
+{
 	if (RecordingIndex < RECORDING_SIZE)
-		{
-		RecordingBuffer[RecordingIndex].input = (BYTE)input;
+	{
+		RecordingBuffer[RecordingIndex].input = (BYTE) input;
 		++RecordingIndex;
-		}
+	}
 
 	//VALUE2 = RecordingIndex;
-	}
+}
 
 
-static void PlayBack (DWORD *input)
-	{
+static void PlayBack(DWORD *input)
+{
 	if (RecordingIndex < EndOfRecording)
-		{
-		*input = (DWORD)RecordingBuffer[RecordingIndex].input;
+	{
+		*input = (DWORD) RecordingBuffer[RecordingIndex].input;
 		++RecordingIndex;
-		}
+	}
 	else
-		{
+	{
 		*input = 0;
 		RewindRecording();
 		Replay = FALSE;
 		ReplayFinished = TRUE;
-		}
-
-	//VALUE2 = RecordingIndex;
 	}
 
+	//VALUE2 = RecordingIndex;
+}
 
-static void WriteRecordingToFile (void)
-	{
+
+static void WriteRecordingToFile(void)
+{
 	char filename[80];
 	FILE *f;
 	size_t i, size;
 
 	sprintf(filename, "Track%dRecording.bin", TrackID);
 
-	if ((f = fopen(filename, "wb")) == NULL )		// write, binary
-		{
+	if ((f = fopen(filename, "wb")) == NULL)		// write, binary
+	{
 		fprintf(out, "Can't open %s\n", filename);
 		return;
-		}
+	}
 
 	size = EndOfRecording;
 	if ((i = fwrite(RecordingBuffer, sizeof(RECORDING), size, f)) != size)
-		{
+	{
 		fprintf(out, "Can't write %s correctly (%d)\n", filename, i);
 		fclose(f);
 		return;
-		}
+	}
 
 	fclose(f);
 	return;
-	}
+}
 
 
-static void ReadRecordingFromFile (void)
-	{
+static void ReadRecordingFromFile(void)
+{
 	char filename[80];
 	errno_t err;
 	FILE *in_file;
@@ -4257,46 +4257,46 @@ static void ReadRecordingFromFile (void)
 	sprintf_s(filename, sizeof(filename), "Track%dRecording.bin", TrackID);
 
 	if ((err = fopen_s(&in_file, filename, "rb")) != 0)		// read, binary
-		{
+	{
 		fprintf(out, "Can't open %s\n", filename);
 		return;
-		}
+	}
 
 	i = fread(RecordingBuffer, sizeof(char), RECORDING_SIZE, in_file);
 	if (i == 0)
-		{
+	{
 		fprintf(out, "Can't read %s correctly (%d)\n", filename, i);
 		fclose(in_file);
 		return;
-		}
+	}
 	EndOfRecording = i;
 
 	fclose(in_file);
 	return;
-	}
+}
 
 
 // request replay of last game
-void RequestGameReplay (void)
-	{
+void RequestGameReplay(void)
+{
 	EndOfRecording = RecordingIndex;
-//	note - think this function has a bug WriteRecordingToFile();
+	//	note - think this function has a bug WriteRecordingToFile();
 	RewindRecording();
 	ReplayRequested = TRUE;
 
 	ReplayLooping = FALSE;
-	}
+}
 
 
 // request replay of pre-recorded game
-void RequestStoredReplay (void)
-	{
+void RequestStoredReplay(void)
+{
 	ReadRecordingFromFile();
 	RewindRecording();
 	ReplayRequested = TRUE;
 
 	ReplayLooping = TRUE;
-	}
+}
 #endif
 
 #ifdef USE_AMIGA_RECORDING
@@ -4310,66 +4310,66 @@ void RequestStoredReplay (void)
 static FILE *AmigaFile = NULL;
 
 
-static bool OpenAmigaRecording( void )
+static bool OpenAmigaRecording(void)
 {
-errno_t err;
+	errno_t err;
 
 	if (AmigaFile) return(TRUE);	// Already open
 
 	if ((err = fopen_s(&AmigaFile, "SCRecording.bin", "rb")) != 0)		// read, binary
-		{
+	{
 		fprintf(out, "Can't open SCRecording.bin\n");
 		return(FALSE);
-		}
+	}
 
 	StartOfAmigaRecording = TRUE;
 	AmigaRecordingFrame = 0;
 	return(TRUE);
 }
 
-bool GetRecordedAmigaWord( long *value_out )
+bool GetRecordedAmigaWord(long *value_out)
 {
-char b[2];
-short s;
-size_t i;
+	char b[2];
+	short s;
+	size_t i;
 
 	if (!ReplayAmigaRecording) return(FALSE);
 
 	if (!OpenAmigaRecording()) return(FALSE);
 
 	i = fread(b, sizeof(char), 2, AmigaFile);
-    if (i == 0)
-		{
+	if (i == 0)
+	{
 		int e = ferror(AmigaFile);
 		if (e) fprintf(out, "Can't read Amiga word correctly (%d)\n", e);
 
 		return(FALSE);
-		}
+	}
 
 	s = ((b[0] & 0xff) << 8) | (b[1] & 0xff);
 
-	*value_out = (long)s;
+	*value_out = (long) s;
 	return(TRUE);
 }
 
-bool GetRecordedAmigaLong( long *value_out )
+bool GetRecordedAmigaLong(long *value_out)
 {
-char b[4];
-long l;
-size_t i;
+	char b[4];
+	long l;
+	size_t i;
 
 	if (!ReplayAmigaRecording) return(FALSE);
 
 	if (!OpenAmigaRecording()) return(FALSE);
 
 	i = fread(b, sizeof(char), 4, AmigaFile);
-    if (i == 0)
-		{
+	if (i == 0)
+	{
 		int e = ferror(AmigaFile);
 		if (e) fprintf(out, "Can't read Amiga long correctly (%d)\n", e);
 
 		return(FALSE);
-		}
+	}
 
 	l = ((b[0] & 0xff) << 24) | ((b[1] & 0xff) << 16) | ((b[2] & 0xff) << 8) | (b[3] & 0xff);
 
@@ -4377,27 +4377,27 @@ size_t i;
 	return(TRUE);
 }
 
-void CompareAmigaWord( char *name, long amiga_value, long *value )
+void CompareAmigaWord(char *name, long amiga_value, long *value)
 {
 	if (*value != amiga_value)
-//	if (abs(*value - amiga_value) > 1)
+		//	if (abs(*value - amiga_value) > 1)
 	{
 		++VALUE1;	// Count differences
 		fprintf(out, "%s different %d %d (VALUE2 %d)\n", name, amiga_value, *value, VALUE2);
-//		*value = amiga_value;	// Use Amiga value when different
+		//		*value = amiga_value;	// Use Amiga value when different
 	}
 }
 
-void CompareRecordedAmigaWord( char *name, long *value )
+void CompareRecordedAmigaWord(char *name, long *value)
 {
-long amiga_value;
+	long amiga_value;
 
 	if (!GetRecordedAmigaWord(&amiga_value)) return;
 
-	CompareAmigaWord( name, amiga_value, value );
+	CompareAmigaWord(name, amiga_value, value);
 }
 
-void CloseAmigaRecording( void )
+void CloseAmigaRecording(void)
 {
 	if (AmigaFile)
 	{

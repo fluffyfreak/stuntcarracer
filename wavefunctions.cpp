@@ -15,38 +15,38 @@
 *********************************************************************************/
 
 IDirectSoundBuffer8* MakeSoundBuffer(IDirectSound8 *ds, LPCWSTR lpSampleName)
-	{
+{
 	IDirectSoundBuffer8		*TempBuffer;
 	DSBUFFERDESC			dsbd;
 	LPBYTE					lpWaveData;
 	HRESULT					err;
 	void					*pRIFFBytes;
 
-    ZeroMemory(&dsbd, sizeof(dsbd));
+	ZeroMemory(&dsbd, sizeof(dsbd));
 
-	if ((pRIFFBytes = GetWAVRes(NULL,lpSampleName)) != NULL)
-		{
-		UnpackWAVChunk(pRIFFBytes,&dsbd.lpwfxFormat,&lpWaveData,&dsbd.dwBufferBytes);
+	if ((pRIFFBytes = GetWAVRes(NULL, lpSampleName)) != NULL)
+	{
+		UnpackWAVChunk(pRIFFBytes, &dsbd.lpwfxFormat, &lpWaveData, &dsbd.dwBufferBytes);
 
 		dsbd.dwSize = sizeof(dsbd);
-//	    dsbd.dwFlags = /*DSBCAPS_CTRLDEFAULT |*/ DSBCAPS_STATIC;
-	    dsbd.dwFlags = DSBCAPS_CTRLFREQUENCY | DSBCAPS_CTRLPAN | DSBCAPS_CTRLVOLUME;// | DSBCAPS_CTRLPOSITIONNOTIFY;
+		//	    dsbd.dwFlags = /*DSBCAPS_CTRLDEFAULT |*/ DSBCAPS_STATIC;
+		dsbd.dwFlags = DSBCAPS_CTRLFREQUENCY | DSBCAPS_CTRLPAN | DSBCAPS_CTRLVOLUME;// | DSBCAPS_CTRLPOSITIONNOTIFY;
 
-		err = ds->CreateSoundBuffer(&dsbd, (LPDIRECTSOUNDBUFFER *)&TempBuffer, NULL);
+		err = ds->CreateSoundBuffer(&dsbd, (LPDIRECTSOUNDBUFFER *) &TempBuffer, NULL);
 
 		if (err == DS_OK)
-			WriteWAVData( TempBuffer, lpWaveData, dsbd.dwBufferBytes);
+			WriteWAVData(TempBuffer, lpWaveData, dsbd.dwBufferBytes);
 		else
 			return NULL;
 
-		}
+	}
 	else
-		{
+	{
 		return NULL;
-		}
+	}
 
 	return (IDirectSoundBuffer8 *) TempBuffer;
-	}
+}
 
 /*********************************************************************************
 /
@@ -57,7 +57,7 @@ IDirectSoundBuffer8* MakeSoundBuffer(IDirectSound8 *ds, LPCWSTR lpSampleName)
 *********************************************************************************/
 
 void* GetWAVRes(HMODULE hModule, LPCWSTR lpResName)
-	{
+{
 	HRSRC		hResInfo;
 	HGLOBAL		hResData;
 	void		*pRIFFBytes;
@@ -65,14 +65,14 @@ void* GetWAVRes(HMODULE hModule, LPCWSTR lpResName)
 	if ((hResInfo = FindResource(hModule, lpResName, L"WAVE")) == NULL)
 		return NULL;
 
-	if ((hResData= LoadResource(hModule, hResInfo)) == NULL)
+	if ((hResData = LoadResource(hModule, hResInfo)) == NULL)
 		return NULL;
 
-	if	((pRIFFBytes = LockResource(hResData))==NULL)
+	if ((pRIFFBytes = LockResource(hResData)) == NULL)
 		return NULL;
 
-	return (void*)pRIFFBytes;
-	}
+	return (void*) pRIFFBytes;
+}
 
 
 /***********************************************************************************
@@ -83,31 +83,31 @@ void* GetWAVRes(HMODULE hModule, LPCWSTR lpResName)
 /
 ***********************************************************************************/
 
-BOOL WriteWAVData( LPDIRECTSOUNDBUFFER8 lpDSB, LPBYTE lpWaveData, DWORD dwWriteBytes )
-	{
+BOOL WriteWAVData(LPDIRECTSOUNDBUFFER8 lpDSB, LPBYTE lpWaveData, DWORD dwWriteBytes)
+{
 	HRESULT dsval;
 
 	if (lpDSB && lpWaveData && dwWriteBytes)
-		{
+	{
 		LPVOID lpAudioPtr1, lpAudioPtr2;
 		DWORD dwAudioBytes1, dwAudioBytes2;
 
 		dsval = lpDSB->Lock(0, dwWriteBytes, &lpAudioPtr1, &dwAudioBytes1, &lpAudioPtr2, &dwAudioBytes2, 0);
 
 		if (dsval == DS_OK)
-			{
+		{
 			CopyMemory(lpAudioPtr1, lpWaveData, dwAudioBytes1);
 
-			if( dwAudioBytes2 != 0)
+			if (dwAudioBytes2 != 0)
 				CopyMemory(lpAudioPtr2, lpWaveData + dwAudioBytes1, dwAudioBytes2);
 
 			lpDSB->Unlock(lpAudioPtr1, dwAudioBytes1, lpAudioPtr2, dwAudioBytes2);
 			return TRUE;
-			}
 		}
+	}
 
 	return FALSE;
-	}
+}
 
 /*********************************************************************************
 /
@@ -117,8 +117,8 @@ BOOL WriteWAVData( LPDIRECTSOUNDBUFFER8 lpDSB, LPBYTE lpWaveData, DWORD dwWriteB
 /
 *********************************************************************************/
 
-BOOL UnpackWAVChunk( void *pRIFFBytes, LPWAVEFORMATEX *lpwfmx, LPBYTE *lpChunkData, DWORD *lpCkSize )
-	{
+BOOL UnpackWAVChunk(void *pRIFFBytes, LPWAVEFORMATEX *lpwfmx, LPBYTE *lpChunkData, DWORD *lpCkSize)
+{
 	DWORD *dwChunkBitsPtr;	// current data being referenced
 	DWORD *dwChunkTailPtr;  // points to end of chunk
 	DWORD dwChunkID;        // four byte chunk ID
@@ -131,17 +131,17 @@ BOOL UnpackWAVChunk( void *pRIFFBytes, LPWAVEFORMATEX *lpwfmx, LPBYTE *lpChunkDa
 
 	// initialize the ckData pointer
 	if (lpChunkData)
-		*lpChunkData=NULL;
+		*lpChunkData = NULL;
 
 	// initialize the ckSize pointer
 	if (lpCkSize)
-		*lpCkSize=0;
+		*lpCkSize = 0;
 
 	// reference the WAVE resource buffer
-	dwChunkBitsPtr = (DWORD*)pRIFFBytes;
+	dwChunkBitsPtr = (DWORD*) pRIFFBytes;
 
 	// unpack the chunk ID
-	dwChunkID = *dwChunkBitsPtr++;	
+	dwChunkID = *dwChunkBitsPtr++;
 
 	// unpack the size field
 	dwLength = *dwChunkBitsPtr++;
@@ -151,17 +151,17 @@ BOOL UnpackWAVChunk( void *pRIFFBytes, LPWAVEFORMATEX *lpwfmx, LPBYTE *lpChunkDa
 
 	// read the 4 byte identifier (FOURCC )
 
-	if (dwChunkID!=mmioFOURCC('R','I','F','F'))
+	if (dwChunkID != mmioFOURCC('R', 'I', 'F', 'F'))
 		return FALSE; // not a RIFF
 
-	if (dwType!=mmioFOURCC('W','A','V','E'))
+	if (dwType != mmioFOURCC('W', 'A', 'V', 'E'))
 		return FALSE; // not a WAV
 
-	dwChunkTailPtr = (DWORD*)((BYTE*)dwChunkBitsPtr + dwLength-4);
+	dwChunkTailPtr = (DWORD*) ((BYTE*) dwChunkBitsPtr + dwLength - 4);
 
-//	while(1)
+	//	while(1)
 	for (;;)
-		{
+	{
 
 		// unpack the Form Type
 		dwType = *dwChunkBitsPtr++;
@@ -169,45 +169,45 @@ BOOL UnpackWAVChunk( void *pRIFFBytes, LPWAVEFORMATEX *lpwfmx, LPBYTE *lpChunkDa
 		// unpack the size
 		dwLength = *dwChunkBitsPtr++;
 
-		switch(dwType)
-			{
-			case mmioFOURCC('f','m','t',' '):
+		switch (dwType)
+		{
+		case mmioFOURCC('f', 'm', 't', ' '):
 
 			if (lpwfmx && !*lpwfmx)
-				{
+			{
 				if (dwLength < sizeof(WAVEFORMAT))
 					return FALSE; // not WAV
 
-				*lpwfmx = (LPWAVEFORMATEX)dwChunkBitsPtr;
+				*lpwfmx = (LPWAVEFORMATEX) dwChunkBitsPtr;
 
-				if ( (!lpChunkData || *lpChunkData) && (!lpCkSize || *lpCkSize))
+				if ((!lpChunkData || *lpChunkData) && (!lpCkSize || *lpCkSize))
 					return TRUE;
 
-				} // if lpwfmx
+			} // if lpwfmx
 			break;  // case 'fmt '
 
-			case mmioFOURCC('d','a','t','a'):
+		case mmioFOURCC('d', 'a', 't', 'a'):
 
 			if ((lpChunkData && !*lpChunkData) || (lpCkSize && !*lpCkSize))
-				{
+			{
 				if (lpChunkData)
-					*lpChunkData = (LPBYTE)dwChunkBitsPtr;
+					*lpChunkData = (LPBYTE) dwChunkBitsPtr;
 
 				if (lpCkSize)
 					*lpCkSize = dwLength;
 
 				if (!lpwfmx || *lpwfmx)
 					return TRUE;
-				} // if lpChunkData
+			} // if lpChunkData
 			break;
-			} // switch dwType
+		} // switch dwType
 
-		dwChunkBitsPtr = (DWORD*)((BYTE*)dwChunkBitsPtr + ((dwLength+1)&~1));
+		dwChunkBitsPtr = (DWORD*) ((BYTE*) dwChunkBitsPtr + ((dwLength + 1)&~1));
 
 		if (dwChunkBitsPtr >= dwChunkTailPtr)
 			break;
 
-		} // while dwChunkBitsPtr
+	} // while dwChunkBitsPtr
 	return FALSE;
-	}
+}
 

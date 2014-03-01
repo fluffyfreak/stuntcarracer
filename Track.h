@@ -19,7 +19,7 @@
 #define	NUM_TRACK_CUBES	16		// x,z dimensions of Track, in cubes
 
 #define	CUBE_SIZE	0x04000000		// size of a single track cube
-									// (0x800 * PC_FACTOR of 2 * PRECISION)
+// (0x800 * PC_FACTOR of 2 * PRECISION)
 #define	LOG_CUBE_SIZE	26			// to base 2
 
 #define	TRACK_BOTTOM_Y	0		// used to be 512
@@ -40,24 +40,24 @@
 /*	Structure definitions */
 /*	===================== */
 typedef struct
-	{
+{
 	long	x;
 	long	z;
-	} COORD_XZ;
+} COORD_XZ;
 
 typedef struct
-	{
+{
 	long	y;
-	} COORD_Y;
+} COORD_Y;
 
 typedef struct
-	{
+{
 	long	x, y, z;		// of piece's front left corner, within world
 	long	roughPieceAngle;	// 0, 90, 180, 270 degrees (stored in internal angle format)
 	long	oppositeDirection;	// TRUE/FALSE - normal travel direction along piece
 	long	curveToLeft;	// TRUE/FALSE
 	long	type;			// near.section.byte1 - 0x00 STRAIGHT, 0x40 DIAGONAL (45 degrees)
-							//						0x80 CURVE RIGHT, 0xc0 CURVE LEFT
+	//						0x80 CURVE RIGHT, 0xc0 CURVE LEFT
 	long	lengthReduction;
 	long	steeringAmount;
 	/* following not needed since project converted to use Direct3D
@@ -79,31 +79,31 @@ typedef struct
 	COORD_3D *transformed_coords;
 	COORD_2D *screen_coords;
 	*/
-	} TRACK_PIECE;
+} TRACK_PIECE;
 
 /*	============================== */
 /*	External function declarations */
 /*	============================== */
-extern WCHAR *GetTrackName( long track );
+extern WCHAR *GetTrackName(long track);
 
-extern char GetPieceAngleAndTemplate( long piece );
+extern char GetPieceAngleAndTemplate(long piece);
 
-extern long ConvertAmigaTrack( long track );
+extern long ConvertAmigaTrack(long track);
 
-extern void FreeTrackData( void );
+extern void FreeTrackData(void);
 
-extern HRESULT CreateTrackVertexBuffer (IDirect3DDevice9 *pd3dDevice);
+extern HRESULT CreateTrackVertexBuffer(IDirect3DDevice9 *pd3dDevice);
 
-extern void FreeTrackVertexBuffer (void);
+extern void FreeTrackVertexBuffer(void);
 
-extern void DrawTrack (IDirect3DDevice9 *pd3dDevice);
+extern void DrawTrack(IDirect3DDevice9 *pd3dDevice);
 
-extern HRESULT CreateShadowVertexBuffer (IDirect3DDevice9 *pd3dDevice);
+extern HRESULT CreateShadowVertexBuffer(IDirect3DDevice9 *pd3dDevice);
 
-extern void FreeShadowVertexBuffer (void);
+extern void FreeShadowVertexBuffer(void);
 
-extern void MoveDrawBridge ( void );
+extern void MoveDrawBridge(void);
 
-extern void ResetDrawBridge( void );
+extern void ResetDrawBridge(void);
 
 #endif	/* _TRACK */
