@@ -5,7 +5,7 @@ Fork of stuntcarremake from sourceforge: http://sourceforge.net/projects/stuntca
 
 Fomr the original SourceForge page:
 
-> About
+> About.
 > This is a partial Windows conversion of the classic computer game Stunt Car Racer.  
 > The game is based on the original Commodore Amiga version.
 > It is written in C/C++ and utilises DirectX/Direct3D.
