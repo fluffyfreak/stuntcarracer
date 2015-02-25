@@ -42,8 +42,8 @@
 //#define	FOCUS	256			// for screen width of 320
 //#define	LOG_FOCUS	8		// to base 2
 
-#define	FOCUS	512			// for screen width of 640
-#define	LOG_FOCUS	9		// to base 2
+// #define	FOCUS	512			// for screen width of 640
+// #define	LOG_FOCUS	9		// to base 2
 
 /*	===================== */
 /*	Structure definitions */
