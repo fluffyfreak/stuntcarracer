@@ -1,2 +1,8 @@
-
+Debug/
+Release/
+ipch/
 *.suo
+*.sdf
+*.opensdf
+*.vcxproj.user
+SCRLog.txt
