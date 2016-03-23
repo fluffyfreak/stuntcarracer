@@ -854,8 +854,7 @@ HRESULT DXUTCreateWindow( const WCHAR* strWindowTitle, HINSTANCE hInstance,
 
         // Create the render window
 		// 21/02/2012 changed to prevent window from being resized (original line is below)
-        HWND hWnd = CreateWindow( L"Direct3DWindowClass", strWindowTitle, WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
-		//HWND hWnd = CreateWindow( L"Direct3DWindowClass", strWindowTitle, WS_OVERLAPPEDWINDOW,
+		HWND hWnd = CreateWindow( L"Direct3DWindowClass", strWindowTitle, WS_OVERLAPPEDWINDOW,
                                x, y, (rc.right-rc.left), (rc.bottom-rc.top), 0,
                                hMenu, hInstance, 0 );
         if( hWnd == NULL )
